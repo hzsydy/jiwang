@@ -12,6 +12,7 @@ namespace jiwang.model
         public const int name_header_length = 16;
         public const int type_header_length = 4;
         public const int msglen_length = 4;
+        public const int msglen_position = 20;
         public const int msg_position = 24;
 
         public const string type_str_text = "text";

@@ -91,7 +91,7 @@ namespace jiwang
         {
             if (ls != null)
             {
-                ls.register(Interaction.InputBox("请输入好友用户名", "计网大作业"));
+                ls.register(Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493"));
             }
         }
 

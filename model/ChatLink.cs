@@ -137,11 +137,13 @@ namespace jiwang.model
                 byte[] name_header = common.str2ascii(
                     sl.getUserName(), common.name_header_length);
 
+                type_header.CopyTo(buffer, 0);
+                name_header.CopyTo(buffer, common.type_header_length);
+                msg_len.CopyTo(buffer, common.msglen_position);
+                msg.CopyTo(buffer, common.msg_position);
+
                 // Send the data through the socket.
-                sendAsync(type_header);
-                sendAsync(name_header);
-                sendAsync(msg_len);
-                sendAsync(msg);
+                sendAsync(buffer);
                 Console.WriteLine(sl.getUserName()+ ":" + message);
             }
             catch (System.Exception ex)
