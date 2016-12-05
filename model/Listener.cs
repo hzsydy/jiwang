@@ -72,7 +72,7 @@ namespace jiwang.model
             {
                 state.data.AddRange(new List<Byte>(buffer).GetRange(0, bytesRead));
 
-                int msg_len = Convert.ToInt32(common.unicode2Str(state.data.GetRange(
+                int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
                     common.type_header_length + common.name_header_length,
                     common.msglen_length))
                     );
@@ -89,8 +89,8 @@ namespace jiwang.model
                         common.type_header_length, common.name_header_length);
                     List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
 
-                    string type_str = common.unicode2Str(type_header);
-                    string src_username = common.unicode2Str(name_header);
+                    string type_str = common.ascii2Str(type_header);
+                    string src_username = common.ascii2Str(name_header);
 
                     
                     register(src_username);

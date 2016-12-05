@@ -129,12 +129,12 @@ namespace jiwang.model
             {
                 byte[] msg = Encoding.Unicode.GetBytes(message);
 
-                byte[] msg_len = common.str2unicode(
+                byte[] msg_len = common.str2ascii(
                     msg.Length.ToString(), common.msglen_length);
 
-                byte[] type_header = common.str2unicode(
+                byte[] type_header = common.str2ascii(
                     type_str, common.type_header_length);
-                byte[] name_header = common.str2unicode(
+                byte[] name_header = common.str2ascii(
                     sl.getUserName(), common.name_header_length);
 
                 // Send the data through the socket.
