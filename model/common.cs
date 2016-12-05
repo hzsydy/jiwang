@@ -18,23 +18,32 @@ namespace jiwang.model
         public const string type_str_file = "file";
 
 
+        public static string unicode2Str(byte[] buffer)
+        {
+            int inx = Array.FindIndex(buffer, 0, (x) => x == 0);//search for 0
+            if (inx >= 0)
+                return (Encoding.Unicode.GetString(buffer, 0, inx));
+            else
+                return (Encoding.Unicode.GetString(buffer)); 
+        }
+
         public static string ascii2Str(byte[] buffer)
         {
             int inx = Array.FindIndex(buffer, 0, (x) => x == 0);//search for 0
             if (inx >= 0)
                 return (Encoding.ASCII.GetString(buffer, 0, inx));
             else
-                return (Encoding.ASCII.GetString(buffer)); 
+                return (Encoding.ASCII.GetString(buffer));
         }
 
-        public static string ascii2Str(List<byte> buffer)
+        public static string unicode2Str(List<byte> buffer)
         {
-            return ascii2Str(buffer.ToArray());
+            return unicode2Str(buffer.ToArray());
         }
 
-        public static byte[] str2ASCII(string s, int len)
+        public static byte[] str2unicode(string s, int len)
         {
-            byte[] b = Encoding.ASCII.GetBytes(s);
+            byte[] b = Encoding.Unicode.GetBytes(s);
             Array.Resize(ref b, len);
             return b;
         }

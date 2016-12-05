@@ -29,6 +29,7 @@ namespace jiwang.model
             working = false;
 
             listenSocket = null;
+            onRegDictChange = null;
             reg_chatlinks = new Dictionary<string, ChatLink>();
 
             allDone = new ManualResetEvent(false);
@@ -71,7 +72,7 @@ namespace jiwang.model
             {
                 state.data.AddRange(new List<Byte>(buffer).GetRange(0, bytesRead));
 
-                int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
+                int msg_len = Convert.ToInt32(common.unicode2Str(state.data.GetRange(
                     common.type_header_length + common.name_header_length,
                     common.msglen_length))
                     );
@@ -88,13 +89,11 @@ namespace jiwang.model
                         common.type_header_length, common.name_header_length);
                     List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
 
-                    string type_str = common.ascii2Str(type_header);
-                    string src_username = common.ascii2Str(name_header);
+                    string type_str = common.unicode2Str(type_header);
+                    string src_username = common.unicode2Str(name_header);
 
-                    if (!reg_chatlinks.ContainsKey(src_username))
-                    {
-                        genNewChatLink(src_username);
-                    }
+                    
+                    register(src_username);
 
                     ChatLink cl = reg_chatlinks[src_username];
                     cl.onReceive(type_str, msg.ToArray());
@@ -108,15 +107,37 @@ namespace jiwang.model
             }
         }
 
-        void register(ChatLink cl)
+        public delegate void OnRegDictChange(Dictionary<string, ChatLink> dict);
+        public OnRegDictChange onRegDictChange { get; set; }
+        
+        public void register(string username)
         {
-            reg_chatlinks.Add(cl.getDstUserName(), cl);
+            if (!reg_chatlinks.ContainsKey(username))
+            {
+                ChatLink cl = new ChatLink(sl, username);
+                reg_chatlinks.Add(username, cl);
+                if (onRegDictChange != null)
+                {
+                    onRegDictChange(reg_chatlinks);
+                }
+            }
         }
 
-        void genNewChatLink(string username)
+        public void unregister(string username)
         {
-            ChatLink cl = new ChatLink(sl, username);
-            this.register(cl);
+            if (reg_chatlinks.ContainsKey(username))
+            {
+                reg_chatlinks.Remove(username);
+                if (onRegDictChange != null)
+                {
+                    onRegDictChange(reg_chatlinks);
+                }
+            }
+        }
+
+        public ChatLink getChatLink(string username)
+        {
+            return reg_chatlinks[username];
         }
 
         public bool start(ref Exception e)

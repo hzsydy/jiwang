@@ -139,6 +139,7 @@
             this.buttonDelFriend.TabIndex = 2;
             this.buttonDelFriend.Text = "删除好友";
             this.buttonDelFriend.UseVisualStyleBackColor = true;
+            this.buttonDelFriend.Click += new System.EventHandler(this.buttonDelFriend_Click);
             // 
             // buttonAddFriend
             // 
@@ -148,6 +149,7 @@
             this.buttonAddFriend.TabIndex = 1;
             this.buttonAddFriend.Text = "添加好友";
             this.buttonAddFriend.UseVisualStyleBackColor = true;
+            this.buttonAddFriend.Click += new System.EventHandler(this.buttonAddFriend_Click);
             // 
             // listBoxFriend
             // 
@@ -189,6 +191,7 @@
             this.buttonSend.TabIndex = 2;
             this.buttonSend.Text = "发送";
             this.buttonSend.UseVisualStyleBackColor = true;
+            this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
             // 
             // textBoxMsgSend
             // 

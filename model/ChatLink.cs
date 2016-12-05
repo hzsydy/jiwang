@@ -84,7 +84,7 @@ namespace jiwang.model
         {
             if (type_str == common.type_str_text)
             {
-                string str_msg = common.ascii2Str(msg);
+                string str_msg = common.unicode2Str(msg);
                 Console.WriteLine(dst_username+":"+str_msg);
             }
         }
@@ -127,14 +127,14 @@ namespace jiwang.model
             }
             try
             {
-                byte[] msg = Encoding.ASCII.GetBytes(message);
+                byte[] msg = Encoding.Unicode.GetBytes(message);
 
-                byte[] msg_len = common.str2ASCII(
+                byte[] msg_len = common.str2unicode(
                     msg.Length.ToString(), common.msglen_length);
 
-                byte[] type_header = common.str2ASCII(
+                byte[] type_header = common.str2unicode(
                     type_str, common.type_header_length);
-                byte[] name_header = common.str2ASCII(
+                byte[] name_header = common.str2unicode(
                     sl.getUserName(), common.name_header_length);
 
                 // Send the data through the socket.
