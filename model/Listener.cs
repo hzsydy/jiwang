@@ -6,18 +6,20 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.ComponentModel;
 
 namespace jiwang.model
 {
     class Listener
     {
+
         Socket listenSocket;
         const int backlog = 10;
         ServerLink sl;
         Dictionary<string, ChatLink> reg_chatlinks;
 
         bool working = false;
-        bool isStart() { return working; }
+        bool isRunning() { return working; }
         ManualResetEvent allDone;
 
         const int buffersize = 1024;
@@ -48,14 +50,20 @@ namespace jiwang.model
         {
             // Signal the main thread to continue.
             allDone.Set();
-
-            // Get the socket that handles the client request.
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            handler.BeginReceive(buffer, 0, buffersize, 0,
-                new AsyncCallback(readCallback), state); 
+            try
+            {
+                // Get the socket that handles the client request.
+                Socket listener = (Socket)ar.AsyncState;
+                Socket handler = listener.EndAccept(ar);
+                StateObject state = new StateObject();
+                state.workSocket = handler;
+                handler.BeginReceive(buffer, 0, buffersize, 0,
+                    new AsyncCallback(readCallback), state); 
+            }
+            catch (System.Exception /*ex*/)
+            {
+                ;
+            }
         }
 
         void readCallback(IAsyncResult ar)
@@ -112,6 +120,7 @@ namespace jiwang.model
         
         public void register(string username)
         {
+            allDone.WaitOne();
             if (!reg_chatlinks.ContainsKey(username))
             {
                 ChatLink cl = new ChatLink(sl, username);
@@ -120,11 +129,13 @@ namespace jiwang.model
                 {
                     onRegDictChange(reg_chatlinks);
                 }
-            }
+            } 
+            allDone.Set();
         }
 
         public void unregister(string username)
         {
+            allDone.WaitOne();
             if (reg_chatlinks.ContainsKey(username))
             {
                 reg_chatlinks.Remove(username);
@@ -133,6 +144,7 @@ namespace jiwang.model
                     onRegDictChange(reg_chatlinks);
                 }
             }
+            allDone.Set();
         }
 
         public ChatLink getChatLink(string username)
@@ -140,13 +152,11 @@ namespace jiwang.model
             return reg_chatlinks[username];
         }
 
-        public bool start(ref Exception e)
+        public void start()
         {
-            e = null;                
-            //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            //IPAddress ipAddress = ipHostInfo.AddressList[0];
+            if (working) throw new Exception("您已经登录了。");
             string ip;
-            if (!sl.query4IP(sl.getUserName(), out ip, ref e)) return false;
+            sl.query4IP(sl.getUserName(), out ip);
             IPAddress ipAddress = IPAddress.Parse(ip);
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, common.p2p_port);
             try
@@ -154,50 +164,40 @@ namespace jiwang.model
                 listenSocket = new Socket(AddressFamily.InterNetwork,
                    SocketType.Stream, ProtocolType.Tcp);
                 listenSocket.Bind(localEndPoint);
-                working = true;
                 listenSocket.Listen(backlog);
-                Task taskA = Task.Run(
-                    () =>
+                working = true;
+                using (BackgroundWorker bw = new BackgroundWorker())
+                {
+                    bw.DoWork += (object o, DoWorkEventArgs ea) =>
                     {
-                        while (working)
+                        allDone.Reset();
+                        listenSocket.BeginAccept(
+                            new AsyncCallback(this.acceptCallback),
+                            listenSocket); 
+                        Console.WriteLine("Waiting for a connection...");
+                        allDone.WaitOne();
+                    };
+                    bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                    {
+                        if (working)
                         {
-                            allDone.Reset();
-
-                            Console.WriteLine("Waiting for a connection...");
-                            listenSocket.BeginAccept(
-                                new AsyncCallback(this.acceptCallback),
-                                listenSocket);
-
-                            allDone.WaitOne();
+                            bw.RunWorkerAsync();
                         }
-                        listenSocket.Shutdown(SocketShutdown.Both);
-                        listenSocket.Close();
-                        listenSocket = null;
-                    }
-                );
+                    };
+                    bw.RunWorkerAsync();
+                }
             }
             catch (System.Exception ex)
             {
-                e = ex;
                 working = false;
-                return false;
+                throw ex;
             }
-            return true;
         }
 
-        public bool stop(ref Exception e)
+        public void stop()
         {
-            e = null;
-            try
-            {
-                working = false;
-            }
-            catch (System.Exception ex)
-            {
-                e = ex;
-                return false;
-            }
-            return true;
+            working = false; 
+            listenSocket.Close();
         }
 
 

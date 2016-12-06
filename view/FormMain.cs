@@ -20,56 +20,95 @@ namespace jiwang
         public FormMain()
         {
             InitializeComponent();
+            sl = new ServerLink();
+
+            ls = new Listener(sl);
+            ls.onRegDictChange += refreshFriendList;
         }
 
         void writeError(Exception ex)
         {
             if (ex != null)
             {
-                textBoxMsgReceive.Text += ex.Message;
-                textBoxMsgReceive.Text += Environment.NewLine;
+                writeMsg(ex.Message);
             }
+        }
+
+        void writeMsg(string msg)
+        {
+            textBoxMsgReceive.Text += msg;
+            textBoxMsgReceive.Text += Environment.NewLine;
         }
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            sl = new ServerLink();
-            Exception ex = null;
-
-            sl.start(ref ex);
-            if (ex != null) { writeError(ex); return; }
+            try
+            {
+                ;
+            }
+            catch (System.Exception ex)
+            {
+                writeError(ex);
+            }
         }
 
         private void buttonLogIn_Click(object sender, EventArgs e)
         {
-            Exception ex = null;
-            if (sl.logIn(textBoxUsername.Text, textBoxPassword.Text, ref ex))
+            using (BackgroundWorker bw = new BackgroundWorker())
             {
-                ls = new Listener(sl);
-                ls.onRegDictChange += refreshFriendList;
-                ls.start(ref ex);
-                if (ex != null) { writeError(ex); return; }
+                Exception ee = null;
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    try
+                    {
+                        sl.logIn(textBoxUsername.Text, textBoxPassword.Text);
+                        ls.start();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        ee = ex;
+                    }
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    writeError(ee);
+                    if (ee == null)
+                    {
+                        writeMsg("您已经成功登录，用户名为" + sl.getUserName());
+                    }
+                };
+                bw.RunWorkerAsync();
             }
-            else
-            {
-                if (ex != null) { writeError(ex); return; }
-            }
-
         }
 
         private void buttonLogOut_Click(object sender, EventArgs e)
         {
-            Exception ex = null;
-            if (sl.logOut(ref ex))
+            using (BackgroundWorker bw = new BackgroundWorker())
             {
-                ls = null;
-                listBoxFriend.Items.Clear();
+                Exception ee = null;
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    try
+                    {
+                        sl.logOut();
+                        ls.stop();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        ee = ex;
+                    }
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    writeError(ee);
+                    if (ee == null)
+                    {
+                        listBoxFriend.Items.Clear();
+                        writeMsg("您已经成功下线，用户名为" + sl.getUserName());
+                    }
+                };
+                bw.RunWorkerAsync();
             }
-            else
-            {
-                if (ex != null) { writeError(ex); return; }
-            }
-
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -80,18 +119,38 @@ namespace jiwang
 
         void refreshFriendList(Dictionary<string, ChatLink> dict)
         {
-            listBoxFriend.Items.Clear();
-            foreach (string s in dict.Keys)
+            using (BackgroundWorker bw = new BackgroundWorker())
             {
-                listBoxFriend.Items.Add(s);
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    ;
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    listBoxFriend.Items.Clear();
+                    foreach (string s in dict.Keys)
+                    {
+                        listBoxFriend.Items.Add(s);
+                    }
+                };
+                bw.RunWorkerAsync();
             }
         }
 
         private void buttonAddFriend_Click(object sender, EventArgs e)
         {
-            if (ls != null)
+            string newuser = Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493");
+            using (BackgroundWorker bw = new BackgroundWorker())
             {
-                ls.register(Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493"));
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    ls.register(newuser);
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    ;
+                };
+                bw.RunWorkerAsync();
             }
         }
 
@@ -99,10 +158,7 @@ namespace jiwang
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
-                if (ls != null)
-                {
-                    ls.unregister((string)listBoxFriend.Items[listBoxFriend.SelectedIndex]);
-                }
+                ls.unregister((string)listBoxFriend.Items[listBoxFriend.SelectedIndex]);
             }
         }
 
@@ -111,27 +167,17 @@ namespace jiwang
             if (listBoxFriend.SelectedIndex > -1)
             {
                 string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
-                if (ls != null)
+                string text = textBoxMsgSend.Text;
+                try
                 {
+                    if (ls != null) throw new Exception("您未连接到服务器。");
                     ChatLink cl = ls.getChatLink(username);
-
-                    Exception ex = null;
-                    if (cl.tryLink(ref ex))
-                    {
-                        string text = textBoxMsgSend.Text;
-                        if (cl.sendMsg(common.type_str_text, text, ref ex))
-                        {
-                            textBoxMsgSend.Text = string.Empty;
-                        } 
-                        else
-                        {
-                            if (ex != null) { writeError(ex); return; }
-                        }
-                    }
-                    else
-                    {
-                        if (ex != null) { writeError(ex); return; }
-                    }
+                    cl.sendMsg(common.type_str_text, text);
+                    textBoxMsgSend.Text = string.Empty;
+                }
+                catch (System.Exception ex)
+                {
+                	 writeError(ex);
                 }
             }
         }

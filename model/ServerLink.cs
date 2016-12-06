@@ -2,58 +2,60 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using jiwang.model;
+using System.ComponentModel;
 
 namespace jiwang.model
 {
     class ServerLink
     {
-        IPAddress addr;
         IPEndPoint endpoint;
         Socket tcpSocket;
+
+        //private static Mutex mutex = new Mutex();
+        Object lockObj = new Object();
 
         byte[] login_resp, logout_resp, not_on_line;
 
         string username;
 
-        bool linked;
+        bool logged;
 
         byte[] buffer = new byte[1024];
 
-        public ServerLink(string ip = "166.111.140.14", int port=8000)
+        void genNewTcpSocket()
         {
-            addr = IPAddress.Parse(ip);
-            endpoint = new IPEndPoint(addr, port);
             tcpSocket = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
 
-            // Set the receive buffer size to 8k
-            tcpSocket.ReceiveBufferSize = 8192;
-
-            // Set the timeout for synchronous receive methods to 
-            // 1 second (1000 milliseconds.)
+            tcpSocket.ReceiveBufferSize = 1024;
             tcpSocket.ReceiveTimeout = 1000;
-
-            // Set the send buffer size to 8k.
-            tcpSocket.SendBufferSize = 8192;
-
-            // Set the timeout for synchronous send methods
-            // to 1 second (1000 milliseconds.)			
+            tcpSocket.SendBufferSize = 1024;
             tcpSocket.SendTimeout = 1000;
-            linked = false;
+        }
+
+        public ServerLink(string ip = "166.111.140.14", int port = 8000)
+        {
+            IPAddress addr = IPAddress.Parse(ip);
+            endpoint = new IPEndPoint(addr, port);
+            
+            logged = false;
             username = null;
 
             login_resp = Encoding.ASCII.GetBytes("lol");
             logout_resp = Encoding.ASCII.GetBytes("loo");
             not_on_line = Encoding.ASCII.GetBytes("\n");
+
+            genNewTcpSocket();
         }
 
         bool beginWith(byte[] src, byte[] dst)
         {
-            for (int i = 0; i < dst.Length; i++ )
+            for (int i = 0; i < dst.Length; i++)
             {
                 if (src[i] != dst[i])
                 {
@@ -63,147 +65,151 @@ namespace jiwang.model
             return true;
         }
 
-        public bool isAlive()
-        {
-            return linked;
-        }
+        public bool linked { get { return tcpSocket.Connected; } }
 
         public string getUserName()
         {
             return username;
         }
 
-        public bool start(ref Exception e)
+        public void logIn(string username, string password)
         {
-            e = null;
-            try
+            if (Monitor.TryEnter(lockObj))
             {
-                if (linked) throw new System.Exception("已经连接服务器！");
-                tcpSocket.Connect(endpoint);
-            }
-            catch (System.Exception ex)
-            {
-                e = ex;
-                return false;
-            }
-            linked = true;
-            return true;
-        }
-
-        public bool logIn(string username, string password, ref Exception e)
-        {
-            e = null;
-            byte[] msg = Encoding.ASCII.GetBytes(username + "_" + password);
-            try
-            {
-                buffer[0] = 0;
-
-                if (!linked) throw new System.Exception("尚未连接服务器！");
-
-                // Send the data through the socket.
-                int bytesSent = tcpSocket.Send(msg);
-
-                // Receive the response from the remote device.
-                int bytesRec = tcpSocket.Receive(buffer);
-
-                if (beginWith(buffer, login_resp))
+                try
                 {
-                    this.username = username;
-                    return true;
+                    byte[] msg = Encoding.ASCII.GetBytes(username + "_" + password);
+
+                    buffer[0] = 0;
+
+                    if (!linked)
+                    {
+                        bool done = false;
+                        tcpSocket.BeginConnect(endpoint.Address, endpoint.Port,
+                            new AsyncCallback((IAsyncResult ar) =>
+                            {
+                                done = true;
+                                Socket s = (Socket)ar.AsyncState;
+                                s.EndConnect(ar);
+                            }), tcpSocket);
+                        while (!done)
+                        {
+                            ;
+                        }
+                    }
+                    if (!linked) throw new Exception("无法连接服务器！");
+                    if (logged) throw new Exception("您已上线！");
+
+                    int bytesSent = tcpSocket.Send(msg);
+                    int bytesRec = tcpSocket.Receive(buffer);
+
+                    if (beginWith(buffer, login_resp))
+                    {
+                        this.username = username;
+                        logged = true;
+                    }
+                    else
+                    {
+                        throw new Exception("未能收到服务器的正确登录应答！");
+                    }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    throw new System.Exception("未能收到服务器的正确登录应答！");
+                    throw ex;
                 }
-            }
-            catch (System.Exception ex)
-            {
-                e = ex;
-                return false;
-            }
-        }
-
-        public bool query4IP(string dst_username, out string ip, ref Exception e)
-        {
-            ip = null;
-            e = null;
-            byte[] msg = Encoding.ASCII.GetBytes("q" + dst_username);
-            try
-            {
-                if (!linked) throw new System.Exception("尚未连接服务器！");
-                buffer[0] = 0;
-
-                // Send the data through the socket.
-                int bytesSent = tcpSocket.Send(msg);
-
-                // Receive the response from the remote device.
-                int bytesRec = tcpSocket.Receive(buffer);
-
-                if (beginWith(buffer, not_on_line))
+                finally
                 {
-                    throw new System.Exception("该用户已经下线！");
-                }
-                else
-                {
-                    ip = common.ascii2Str(buffer);
-                    return true;
+                    Monitor.Exit(lockObj);
                 }
             }
-            catch (System.Exception ex)
+            else
             {
-                e = ex;
-                return false;
+                throw new Exception("请等待上一项操作完成。");
             }
         }
 
-        public bool logOut(ref Exception e)
+        public void query4IP(string dst_username, out string ip)
         {
-            e = null;
-            byte[] msg = Encoding.ASCII.GetBytes("logout" + username);
-            try
+            if (Monitor.TryEnter(lockObj))
             {
-                buffer[0] = 0;
-
-                if (!linked) throw new System.Exception("尚未连接服务器！");
-
-                // Send the data through the socket.
-                int bytesSent = tcpSocket.Send(msg);
-
-                // Receive the response from the remote device.
-                int bytesRec = tcpSocket.Receive(buffer);
-
-                if (beginWith(buffer, logout_resp))
+                try
                 {
-                    return true;
+                    ip = null;
+                    byte[] msg = Encoding.ASCII.GetBytes("q" + dst_username);
+
+
+                    if (!linked) throw new System.Exception("尚未连接服务器！");
+                    if (!logged) throw new Exception("您未上线！");
+                    buffer[0] = 0;
+
+                    int bytesSent = tcpSocket.Send(msg);
+                    int bytesRec = tcpSocket.Receive(buffer);
+
+                    if (beginWith(buffer, not_on_line))
+                    {
+                        throw new System.Exception("该用户已经下线！");
+                    }
+                    else
+                    {
+                        ip = common.ascii2Str(buffer);
+                    }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    throw new System.Exception("未能收到服务器的正确下线应答！");
+                    throw ex;
+                }
+                finally
+                {
+                    Monitor.Exit(lockObj);
                 }
             }
-            catch (System.Exception ex)
+            else
             {
-                e = ex;
-                return false;
+                throw new Exception("请等待上一项操作完成。");
             }
+
         }
 
-        public bool stop(ref Exception e)
+        public void logOut()
         {
-            try
+            if (Monitor.TryEnter(lockObj))
             {
-                if (!linked) throw new System.Exception("尚未连接服务器！");
-                // Release the socket.
-                tcpSocket.Shutdown(SocketShutdown.Both);
-                tcpSocket.Close();
+                try
+                {
+                    byte[] msg = Encoding.ASCII.GetBytes("logout" + username);
+
+                    buffer[0] = 0;
+
+                    if (!linked) throw new System.Exception("尚未连接服务器！");
+                    if (!logged) throw new Exception("您未上线！");
+
+                    int bytesSent = tcpSocket.Send(msg);
+                    int bytesRec = tcpSocket.Receive(buffer);
+
+                    if (beginWith(buffer, logout_resp))
+                    {
+                        logged = false;
+                        
+                        genNewTcpSocket();
+                    }
+                    else
+                    {
+                        throw new System.Exception("未能收到服务器的正确下线应答！");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    Monitor.Exit(lockObj);
+                }
             }
-            catch (System.Exception ex)
+            else
             {
-                e = ex;
-                return false;
+                throw new Exception("请等待上一项操作完成。");
             }
-            linked = false;
-            return true;
         }
     }
 }

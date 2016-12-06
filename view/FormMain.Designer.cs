@@ -206,6 +206,7 @@
             this.textBoxMsgReceive.Location = new System.Drawing.Point(9, 17);
             this.textBoxMsgReceive.Multiline = true;
             this.textBoxMsgReceive.Name = "textBoxMsgReceive";
+            this.textBoxMsgReceive.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxMsgReceive.Size = new System.Drawing.Size(514, 330);
             this.textBoxMsgReceive.TabIndex = 0;
             // 
