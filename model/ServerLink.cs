@@ -11,7 +11,7 @@ using System.ComponentModel;
 
 namespace jiwang.model
 {
-    class ServerLink
+    public class ServerLink
     {
         IPEndPoint endpoint;
         Socket tcpSocket;

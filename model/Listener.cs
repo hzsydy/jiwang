@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace jiwang.model
 {
-    class Listener
+    public class Listener
     {
 
         Socket listenSocket;
@@ -31,7 +31,7 @@ namespace jiwang.model
             working = false;
 
             listenSocket = null;
-            onRegDictChange = null;
+            form = null;
             reg_chatlinks = new Dictionary<string, ChatLink>();
 
             allDone = new ManualResetEvent(false);
@@ -115,36 +115,31 @@ namespace jiwang.model
             }
         }
 
-        public delegate void OnRegDictChange(Dictionary<string, ChatLink> dict);
-        public OnRegDictChange onRegDictChange { get; set; }
+        public FormMain form { get; set; }
         
         public void register(string username)
         {
-            allDone.WaitOne();
             if (!reg_chatlinks.ContainsKey(username))
             {
                 ChatLink cl = new ChatLink(sl, username);
                 reg_chatlinks.Add(username, cl);
-                if (onRegDictChange != null)
+                if (form != null)
                 {
-                    onRegDictChange(reg_chatlinks);
+                    form.BeginInvoke((Action)delegate{ form.refreshFriendList(reg_chatlinks.Keys); });
                 }
             } 
-            allDone.Set();
         }
 
         public void unregister(string username)
         {
-            allDone.WaitOne();
             if (reg_chatlinks.ContainsKey(username))
             {
                 reg_chatlinks.Remove(username);
-                if (onRegDictChange != null)
+                if (form != null)
                 {
-                    onRegDictChange(reg_chatlinks);
+                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks.Keys); });
                 }
             }
-            allDone.Set();
         }
 
         public ChatLink getChatLink(string username)

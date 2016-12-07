@@ -23,7 +23,7 @@ namespace jiwang
             sl = new ServerLink();
 
             ls = new Listener(sl);
-            ls.onRegDictChange += refreshFriendList;
+            ls.form  = this;
         }
 
         void writeError(Exception ex)
@@ -117,24 +117,13 @@ namespace jiwang
             //fm.Show();
         }
 
-        void refreshFriendList(Dictionary<string, ChatLink> dict)
+        public void refreshFriendList(IEnumerable<string> keys)
         {
-            using (BackgroundWorker bw = new BackgroundWorker())
+            listBoxFriend.Items.Clear();
+            foreach (string s in keys)
             {
-                bw.DoWork += (object o, DoWorkEventArgs ea) =>
-                {
-                    ;
-                };
-                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
-                {
-                    listBoxFriend.Items.Clear();
-                    foreach (string s in dict.Keys)
-                    {
-                        listBoxFriend.Items.Add(s);
-                    }
-                };
-                bw.RunWorkerAsync();
-            }
+                listBoxFriend.Items.Add(s);
+            };
         }
 
         private void buttonAddFriend_Click(object sender, EventArgs e)
@@ -170,7 +159,6 @@ namespace jiwang
                 string text = textBoxMsgSend.Text;
                 try
                 {
-                    if (ls != null) throw new Exception("您未连接到服务器。");
                     ChatLink cl = ls.getChatLink(username);
                     cl.sendMsg(common.type_str_text, text);
                     textBoxMsgSend.Text = string.Empty;

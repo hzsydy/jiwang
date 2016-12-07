@@ -8,7 +8,7 @@ using System.Net.Sockets;
 
 namespace jiwang.model
 {
-    class ChatLink
+    public class ChatLink
     {
         ServerLink sl;
         string dst_username;
