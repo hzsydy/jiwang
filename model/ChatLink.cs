@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.ComponentModel;
 
 namespace jiwang.model
 {
@@ -38,6 +39,40 @@ namespace jiwang.model
             sendSocket.ReceiveTimeout = 1000;
             sendSocket.SendBufferSize = 8192;
             sendSocket.SendTimeout = 1000;
+
+            
+        }
+
+        public void start()
+        {
+            checkDstOnline();
+            using (BackgroundWorker bw = new BackgroundWorker())
+            {
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    if (linked)
+                    {
+                        ping();
+                        Thread.Sleep(10000);
+                    }
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    if (ea.Error != null)
+                    {
+                        if (linked)
+                        {
+                            sendSocket.Close();
+                        }
+                        throw ea.Error;
+                    }
+                    else
+                    {
+                        bw.RunWorkerAsync();
+                    }
+                };
+                bw.RunWorkerAsync();
+            }
         }
 
         public void checkDstOnline()
@@ -64,17 +99,19 @@ namespace jiwang.model
                 }
             }
             if (!linked) throw new Exception("无法连接服务器！");
-            ping();
         }
 
         public void ping()
         {
-            echoreceived = false;
-            sendMsg(common.type_str_ping, "");
-            Thread.Sleep(1000);
-            if (!echoreceived)
+            if (linked)
             {
-                throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
+                echoreceived = false;
+                sendMsg(common.type_str_ping, "");
+                Thread.Sleep(2000);
+                if (!echoreceived)
+                {
+                    throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
+                }
             }
         }
 
