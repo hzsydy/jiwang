@@ -80,7 +80,7 @@ namespace jiwang.model
                 {
                     byte[] msg = Encoding.ASCII.GetBytes(username + "_" + password);
 
-                    buffer[0] = 0;
+                    buffer = new byte[1024];
 
                     if (!linked)
                     {
@@ -140,7 +140,8 @@ namespace jiwang.model
 
                     if (!linked) throw new System.Exception("尚未连接服务器！");
                     if (!logged) throw new Exception("您未上线！");
-                    buffer[0] = 0;
+
+                    buffer = new byte[1024];
 
                     int bytesSent = tcpSocket.Send(msg);
                     int bytesRec = tcpSocket.Receive(buffer);
@@ -178,7 +179,7 @@ namespace jiwang.model
                 {
                     byte[] msg = Encoding.ASCII.GetBytes("logout" + username);
 
-                    buffer[0] = 0;
+                    buffer = new byte[1024];
 
                     if (!linked) throw new System.Exception("尚未连接服务器！");
                     if (!logged) throw new Exception("您未上线！");

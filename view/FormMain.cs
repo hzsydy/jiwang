@@ -56,23 +56,15 @@ namespace jiwang
         {
             using (BackgroundWorker bw = new BackgroundWorker())
             {
-                Exception ee = null;
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
-                    try
-                    {
-                        sl.logIn(textBoxUsername.Text, textBoxPassword.Text);
-                        ls.start();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        ee = ex;
-                    }
+                    sl.logIn(textBoxUsername.Text, textBoxPassword.Text);
+                    ls.start();
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
-                    writeError(ee);
-                    if (ee == null)
+                    writeError(ea.Error);
+                    if (ea.Error == null)
                     {
                         writeMsg("您已经成功登录，用户名为" + sl.getUserName());
                     }
@@ -85,23 +77,15 @@ namespace jiwang
         {
             using (BackgroundWorker bw = new BackgroundWorker())
             {
-                Exception ee = null;
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
-                    try
-                    {
-                        sl.logOut();
-                        ls.stop();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        ee = ex;
-                    }
+                    sl.logOut();
+                    ls.stop();
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
-                    writeError(ee);
-                    if (ee == null)
+                    writeError(ea.Error);
+                    if (ea.Error == null)
                     {
                         listBoxFriend.Items.Clear();
                         writeMsg("您已经成功下线，用户名为" + sl.getUserName());
@@ -137,7 +121,7 @@ namespace jiwang
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
-                    ;
+                    writeError(ea.Error);
                 };
                 bw.RunWorkerAsync();
             }

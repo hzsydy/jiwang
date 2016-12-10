@@ -64,7 +64,7 @@ namespace jiwang.model
                         {
                             sendSocket.Close();
                         }
-                        throw ea.Error;
+                        ls.writeMsg(ea.Error.Message);
                     }
                     else
                     {
@@ -166,7 +166,8 @@ namespace jiwang.model
                 type_str, common.type_header_length);
             byte[] name_header = common.str2ascii(
                 sl.getUserName(), common.name_header_length);
-            
+
+            buffer = new byte[1024];
             type_header.CopyTo(buffer, 0);
             name_header.CopyTo(buffer, common.type_header_length);
             msg_len.CopyTo(buffer, common.msglen_position);

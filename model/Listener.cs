@@ -57,6 +57,7 @@ namespace jiwang.model
                 Socket handler = listener.EndAccept(ar);
                 StateObject state = new StateObject();
                 state.workSocket = handler;
+                buffer = new byte[buffersize];
                 handler.BeginReceive(buffer, 0, buffersize, 0,
                     new AsyncCallback(readCallback), state); 
             }
@@ -108,6 +109,7 @@ namespace jiwang.model
                 }
                 else
                 {
+                    buffer = new byte[buffersize];
                     // Not all data received. Get more.
                     handler.BeginReceive(buffer, 0, buffersize, 0,
                         new AsyncCallback(readCallback), state);
@@ -185,7 +187,7 @@ namespace jiwang.model
                     };
                     bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                     {
-                        if (working)
+                        if (ea.Error == null && working)
                         {
                             bw.RunWorkerAsync();
                         }
@@ -196,6 +198,7 @@ namespace jiwang.model
             catch (System.Exception ex)
             {
                 working = false;
+                listenSocket.Close();
                 throw ex;
             }
         }
