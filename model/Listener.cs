@@ -106,14 +106,13 @@ namespace jiwang.model
 
                     ChatLink cl = reg_chatlinks[src_username];
                     cl.onReceive(type_str, msg.ToArray());
+                    state = new StateObject();
                 }
-                else
-                {
-                    buffer = new byte[buffersize];
-                    // Not all data received. Get more.
-                    handler.BeginReceive(buffer, 0, buffersize, 0,
-                        new AsyncCallback(readCallback), state);
-                }
+                
+                buffer = new byte[buffersize];
+                // Not all data received. Get more.
+                handler.BeginReceive(buffer, 0, buffersize, 0,
+                    new AsyncCallback(readCallback), state);
             }
         }
 

@@ -129,6 +129,7 @@ namespace jiwang.model
             }
             else if (type_str == common.type_str_file)
             {
+                Console.WriteLine("sending file");
                 ;
             } 
             else if (type_str == common.type_str_ping)
@@ -171,7 +172,18 @@ namespace jiwang.model
             sendSocket.BeginSend(buffer, 0, buffer.Length, 0,
                 new AsyncCallback(SendCallback), sendSocket);
             
-            ls.writeMsg("you send : " + message);
+            if (type_str == common.type_str_text)
+            {
+                ls.writeMsg("you send : " + message);
+            }
+            else if (type_str == common.type_str_ping)
+            {
+                Console.WriteLine("sending ping");
+            }
+            else if (type_str == common.type_str_echo)
+            {
+                Console.WriteLine("sending echo");
+            }
         }
     }
 }
