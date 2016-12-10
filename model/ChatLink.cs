@@ -150,9 +150,6 @@ namespace jiwang.model
 
             int bytesSent = handler.EndSend(ar);
             Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-
-            handler.Shutdown(SocketShutdown.Both);
-            handler.Close();
         }
 
         public void sendMsg(string type_str, string message)
@@ -167,7 +164,6 @@ namespace jiwang.model
             byte[] name_header = common.str2ascii(
                 sl.getUserName(), common.name_header_length);
 
-            buffer = new byte[1024];
             type_header.CopyTo(buffer, 0);
             name_header.CopyTo(buffer, common.type_header_length);
             msg_len.CopyTo(buffer, common.msglen_position);
