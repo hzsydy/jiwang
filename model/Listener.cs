@@ -74,45 +74,52 @@ namespace jiwang.model
             StateObject state = (StateObject)ar.AsyncState;
             Socket handler = state.workSocket;
 
-            // Read data from the client socket. 
-            int bytesRead = handler.EndReceive(ar);
-
-            if (bytesRead > 0)
+            try
             {
-                state.data.AddRange(new List<Byte>(buffer).GetRange(0, bytesRead));
-
-                int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
-                    common.type_header_length + common.name_header_length,
-                    common.msglen_length))
-                    );
-
-                int expect_len = common.name_header_length + common.type_header_length +
-                    common.msglen_length + msg_len;
-
-                if (state.data.Count >= expect_len)
+                // Read data from the client socket. 
+                int bytesRead = handler.EndReceive(ar); 
+                if (bytesRead > 0)
                 {
-                    //all data received. parse it
+                    state.data.AddRange(new List<Byte>(buffer).GetRange(0, bytesRead));
 
-                    List<byte> type_header = state.data.GetRange(0, common.type_header_length);
-                    List<byte> name_header = state.data.GetRange(
-                        common.type_header_length, common.name_header_length);
-                    List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
+                    int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
+                        common.type_header_length + common.name_header_length,
+                        common.msglen_length))
+                        );
 
-                    string type_str = common.ascii2Str(type_header);
-                    string src_username = common.ascii2Str(name_header);
+                    int expect_len = common.name_header_length + common.type_header_length +
+                        common.msglen_length + msg_len;
 
-                    
-                    register(src_username);
+                    if (state.data.Count >= expect_len)
+                    {
+                        //all data received. parse it
 
-                    ChatLink cl = reg_chatlinks[src_username];
-                    cl.onReceive(type_str, msg.ToArray());
-                    state = new StateObject();
+                        List<byte> type_header = state.data.GetRange(0, common.type_header_length);
+                        List<byte> name_header = state.data.GetRange(
+                            common.type_header_length, common.name_header_length);
+                        List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
+
+                        string type_str = common.ascii2Str(type_header);
+                        string src_username = common.ascii2Str(name_header);
+
+
+                        register(src_username);
+
+                        ChatLink cl = reg_chatlinks[src_username];
+                        cl.onReceive(type_str, msg.ToArray());
+                        state = new StateObject();
+                        state.workSocket = handler;
+                    }
+
+                    buffer = new byte[buffersize];
+                    // Not all data received. Get more.
+                    handler.BeginReceive(buffer, 0, buffersize, 0,
+                        new AsyncCallback(readCallback), state);
                 }
-                
-                buffer = new byte[buffersize];
-                // Not all data received. Get more.
-                handler.BeginReceive(buffer, 0, buffersize, 0,
-                    new AsyncCallback(readCallback), state);
+            }
+            catch (System.Exception /*ex*/)
+            {
+                ;	
             }
         }
 
