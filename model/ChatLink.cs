@@ -60,11 +60,8 @@ namespace jiwang.model
                 {
                     if (ea.Error != null)
                     {
-                        if (linked)
-                        {
-                            sendSocket.Close();
-                        }
                         ls.writeMsg(ea.Error.Message);
+                        ls.unregister(dst_username);
                     }
                     else
                     {
@@ -149,7 +146,6 @@ namespace jiwang.model
             Socket handler = (Socket)ar.AsyncState;
 
             int bytesSent = handler.EndSend(ar);
-            Console.WriteLine("Sent {0} bytes to client.", bytesSent);
         }
 
         public void sendMsg(string type_str, string message)
