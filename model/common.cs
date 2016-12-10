@@ -17,6 +17,8 @@ namespace jiwang.model
 
         public const string type_str_text = "text";
         public const string type_str_file = "file";
+        public const string type_str_ping = "ping";
+        public const string type_str_echo = "echo";
 
 
         public static string unicode2Str(byte[] buffer)

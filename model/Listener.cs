@@ -121,7 +121,7 @@ namespace jiwang.model
         {
             if (!reg_chatlinks.ContainsKey(username))
             {
-                ChatLink cl = new ChatLink(sl, username);
+                ChatLink cl = new ChatLink(sl, this, username);
                 reg_chatlinks.Add(username, cl);
                 if (form != null)
                 {
@@ -139,6 +139,14 @@ namespace jiwang.model
                 {
                     form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks.Keys); });
                 }
+            }
+        }
+
+        public void writeMsg(string msg)
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.writeMsg(msg); });
             }
         }
 

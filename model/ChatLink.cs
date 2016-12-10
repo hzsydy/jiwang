@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace jiwang.model
 {
     public class ChatLink
     {
         ServerLink sl;
+        Listener ls;
         string dst_username;
 
         public string getDstUserName()
@@ -22,36 +24,84 @@ namespace jiwang.model
 
         byte[] buffer = new byte[1024];
 
+        public bool linked { get { return sendSocket.Connected; } }
 
-        public ChatLink(ServerLink sl, string dst_username)
+        public ChatLink(ServerLink sl, Listener ls, string dst_username)
         {
             this.sl = sl;
+            this.ls = ls;
             this.dst_username = dst_username;
-            sendSocket = null;
+            sendSocket = new Socket(AddressFamily.InterNetwork,
+                SocketType.Stream, ProtocolType.Tcp);
+
+            sendSocket.ReceiveBufferSize = 8192;
+            sendSocket.ReceiveTimeout = 1000;
+            sendSocket.SendBufferSize = 8192;
+            sendSocket.SendTimeout = 1000;
         }
 
-        public void checkDstOnline(out string dst_ip)
+        public void checkDstOnline()
         {
-            dst_ip = null;
+            string dst_ip = null;
             if (!sl.linked) throw new Exception("您已离线.");
             sl.query4IP(dst_username, out dst_ip);
+            IPAddress addr = IPAddress.Parse(dst_ip);
+            IPEndPoint endpoint = new IPEndPoint(addr, common.p2p_port);
+
+            if (!linked)
+            {
+                bool done = false;
+                sendSocket.BeginConnect(endpoint.Address, endpoint.Port,
+                    new AsyncCallback((IAsyncResult ar) =>
+                    {
+                        done = true;
+                        Socket s = (Socket)ar.AsyncState;
+                        s.EndConnect(ar);
+                    }), sendSocket);
+                while (!done)
+                {
+                    ;
+                }
+            }
+            if (!linked) throw new Exception("无法连接服务器！");
+            ping();
         }
+
+        public void ping()
+        {
+            echoreceived = false;
+            sendMsg(common.type_str_ping, "");
+            Thread.Sleep(1000);
+            if (!echoreceived)
+            {
+                throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
+            }
+        }
+
+        bool echoreceived = false;
 
         public void onReceive(string type_str, byte[] msg)
         {
             if (type_str == common.type_str_text)
             {
                 string str_msg = common.unicode2Str(msg);
-                Console.WriteLine(dst_username+":"+str_msg);
+                ls.writeMsg(dst_username + ":" + str_msg);
+            }
+            else if (type_str == common.type_str_file)
+            {
+                ;
+            } 
+            else if (type_str == common.type_str_ping)
+            {
+                sendMsg(common.type_str_echo, "");
+            }
+            else if (type_str == common.type_str_echo)
+            {
+                echoreceived = true;
             }
         }
-        
-        void sendAsync(byte[] data)
-        {
-            sendSocket.BeginSend(data, 0, data.Length, 0,
-                new AsyncCallback(SendCallback), sendSocket);
-        }
-        
+
+
         void SendCallback(IAsyncResult ar)
         {
             Socket handler = (Socket)ar.AsyncState;
@@ -65,21 +115,6 @@ namespace jiwang.model
 
         public void sendMsg(string type_str, string message)
         {
-            string dst_ip;
-            checkDstOnline(out dst_ip);
-
-            IPAddress addr = IPAddress.Parse(dst_ip);
-            IPEndPoint endpoint = new IPEndPoint(addr, common.p2p_port);
-            sendSocket = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            sendSocket.ReceiveBufferSize = 8192;
-            sendSocket.ReceiveTimeout = 1000;
-            sendSocket.SendBufferSize = 8192;		
-            sendSocket.SendTimeout = 1000;
-            
-            sendSocket.Connect(endpoint);
-            
             byte[] msg = Encoding.Unicode.GetBytes(message);
             
             byte[] msg_len = common.str2ascii(
@@ -96,7 +131,8 @@ namespace jiwang.model
             msg.CopyTo(buffer, common.msg_position);
             
             // Send the data through the socket.
-            sendAsync(buffer);
+            sendSocket.BeginSend(buffer, 0, buffer.Length, 0,
+                new AsyncCallback(SendCallback), sendSocket);
             Console.WriteLine("you send : " + message);
         }
     }

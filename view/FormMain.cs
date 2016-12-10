@@ -34,7 +34,7 @@ namespace jiwang
             }
         }
 
-        void writeMsg(string msg)
+        public void writeMsg(string msg)
         {
             textBoxMsgReceive.Text += msg;
             textBoxMsgReceive.Text += Environment.NewLine;
