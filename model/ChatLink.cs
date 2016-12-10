@@ -109,7 +109,7 @@ namespace jiwang.model
             {
                 echoreceived = false;
                 sendMsg(common.type_str_ping, "");
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 if (!echoreceived)
                 {
                     throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
@@ -123,6 +123,7 @@ namespace jiwang.model
         {
             if (type_str == common.type_str_text)
             {
+                Console.WriteLine("receive text");
                 string str_msg = common.unicode2Str(msg);
                 ls.writeMsg(dst_username + ":" + str_msg);
             }
@@ -132,10 +133,12 @@ namespace jiwang.model
             } 
             else if (type_str == common.type_str_ping)
             {
+                Console.WriteLine("receive ping");
                 sendMsg(common.type_str_echo, "");
             }
             else if (type_str == common.type_str_echo)
             {
+                Console.WriteLine("receive echo");
                 echoreceived = true;
             }
         }
@@ -144,7 +147,6 @@ namespace jiwang.model
         void SendCallback(IAsyncResult ar)
         {
             Socket handler = (Socket)ar.AsyncState;
-
             int bytesSent = handler.EndSend(ar);
         }
 
@@ -168,7 +170,8 @@ namespace jiwang.model
             // Send the data through the socket.
             sendSocket.BeginSend(buffer, 0, buffer.Length, 0,
                 new AsyncCallback(SendCallback), sendSocket);
-            Console.WriteLine("you send : " + message);
+            
+            ls.writeMsg("you send : " + message);
         }
     }
 }
