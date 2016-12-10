@@ -123,6 +123,7 @@ namespace jiwang.model
             {
                 ChatLink cl = new ChatLink(sl, this, username);
                 reg_chatlinks.Add(username, cl);
+                cl.start();
                 if (form != null)
                 {
                     form.BeginInvoke((Action)delegate{ form.refreshFriendList(reg_chatlinks.Keys); });
@@ -134,6 +135,8 @@ namespace jiwang.model
         {
             if (reg_chatlinks.ContainsKey(username))
             {
+                ChatLink cl = reg_chatlinks[username];
+                cl.stop();
                 reg_chatlinks.Remove(username);
                 if (form != null)
                 {

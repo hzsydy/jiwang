@@ -75,6 +75,11 @@ namespace jiwang.model
             }
         }
 
+        public void stop()
+        {
+            sendSocket.Close();
+        }
+
         public void checkDstOnline()
         {
             string dst_ip = null;
