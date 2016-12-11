@@ -16,7 +16,12 @@ namespace jiwang.model
         public const int msg_position = 30;
         public const int buffersize = 1024;
 
+        public const int ping_interval = 5000;
+        public const int ping_timeout = 2000;
+
+
         public const string type_str_text = "text";
+        public const string type_str_filename = "flnm";
         public const string type_str_file = "file";
         public const string type_str_ping = "ping";
         public const string type_str_echo = "echo";

@@ -5,10 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using jiwang.model;
 using Microsoft.VisualBasic;
+using System.IO;
 
 namespace jiwang
 {
@@ -152,22 +154,57 @@ namespace jiwang
             }
         }
 
+
         private void buttonSendFile_Click(object sender, EventArgs e)
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
                 string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
-                string text = textBoxMsgSend.Text;
-                try
+                string localFilePath = String.Empty;
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "所有文件(*.*)|*.*";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.Title = "请选择要传的文件";
+                openFileDialog.RestoreDirectory = true;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    ChatLink cl = ls.getChatLink(username);
-                    cl.sendMsg(common.type_str_text, text);
-                    textBoxMsgSend.Text = string.Empty;
+                    localFilePath = openFileDialog.FileName.ToString();
+                    Match match = Regex.Match(localFilePath, @"(\w+\.\w+)\n");
+                    if (match.Success)
+                    {
+                        string filename = match.Value;
+                        try
+                        {
+                            byte[] bytes = File.ReadAllBytes(localFilePath);
+
+                            ChatLink cl = ls.getChatLink(username);
+                            cl.sendMsg(common.type_str_filename, filename);
+                            cl.sendMsg(common.type_str_file, bytes);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            writeError(ex);
+                        }
+                    }
                 }
-                catch (System.Exception ex)
+            }
+        }
+
+        public void writeFile(string filename, byte[] bytes)
+        {
+            try
+            {
+                FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+                folderBrowserDialog.Description = "选择文件保存的位置";
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                 {
-                    writeError(ex);
+                    string filepath = folderBrowserDialog.SelectedPath + @"\" + filename;
+                    File.WriteAllBytes(filepath, bytes);
                 }
+            }
+            catch (System.Exception ex)
+            {
+                writeError(ex);
             }
         }
     }

@@ -52,7 +52,7 @@ namespace jiwang.model
                     if (linked)
                     {
                         ping();
-                        Thread.Sleep(10000);
+                        Thread.Sleep(common.ping_interval);
                     }
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
@@ -108,7 +108,7 @@ namespace jiwang.model
             {
                 echoreceived = false;
                 sendMsg(common.type_str_ping, "");
-                Thread.Sleep(5000);
+                Thread.Sleep(common.ping_timeout);
                 if (!echoreceived)
                 {
                     throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
@@ -117,6 +117,7 @@ namespace jiwang.model
         }
 
         bool echoreceived = false;
+        string nextFileName = string.Empty;
 
         public void onReceive(string type_str, byte[] msg)
         {
@@ -128,8 +129,8 @@ namespace jiwang.model
             }
             else if (type_str == common.type_str_file)
             {
-                Console.WriteLine("sending file");
-                ;
+                Console.WriteLine("receive file");
+                ls.writeFile(nextFileName, msg);
             } 
             else if (type_str == common.type_str_ping)
             {
@@ -140,6 +141,12 @@ namespace jiwang.model
             {
                 Console.WriteLine("receive echo");
                 echoreceived = true;
+            }
+            else if (type_str == common.type_str_filename)
+            {
+                Console.WriteLine("receive file name");
+                nextFileName = common.unicode2Str(msg);
+                ls.writeMsg(dst_username + "向您发送了文件" + nextFileName);
             }
         }
 

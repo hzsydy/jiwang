@@ -74,6 +74,14 @@ namespace jiwang.model
             }
         }
 
+        public void writeFile(string filename, byte[] bytes)
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.writeFile(filename, bytes); });
+            }
+        }
+
         public ChatLink getChatLink(string username)
         {
             return reg_chatlinks[username];
