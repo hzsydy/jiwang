@@ -102,7 +102,7 @@ namespace jiwang
             {
                 listBoxFriend.Items.Add(s);
             };
-            if (listBoxFriend.SelectedIndex == -1)
+            if (listBoxFriend.Items.Count > 0 && listBoxFriend.SelectedIndex == -1)
             {
                 listBoxFriend.SelectedIndex = 0;
             }
