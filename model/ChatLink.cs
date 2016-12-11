@@ -153,29 +153,36 @@ namespace jiwang.model
 
         void SendCallback(IAsyncResult ar)
         {
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-            int bytesSent = handler.EndSend(ar);
-            if (bytesSent > 0)
+            try
             {
-                state.sendPos += bytesSent;
-                if (state.sendPos < state.data.Length)
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket handler = state.workSocket;
+                int bytesSent = handler.EndSend(ar);
+                if (bytesSent > 0)
                 {
-                    if (state.data.Length - state.sendPos >= common.buffersize)
+                    state.sendPos += bytesSent;
+                    if (state.sendPos < state.data.Length)
                     {
-                        sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                            new AsyncCallback(SendCallback), state);
+                        if (state.data.Length - state.sendPos >= common.buffersize)
+                        {
+                            sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
+                        else
+                        {
+                            sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
                     }
                     else
                     {
-                        sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                            new AsyncCallback(SendCallback), state);
+                        ;
                     }
                 }
-                else
-                {
-                    ;
-                }
+            }
+            catch (System.Exception /*ex*/)
+            {
+                ;
             }
         }
 

@@ -126,6 +126,10 @@ namespace jiwang.model
         {
             working = false; 
             listenSocket.Close();
+            while (reg_chatlinks.Count > 0)
+            {
+                unregister(reg_chatlinks.Keys.First());
+            }
         }
 
 

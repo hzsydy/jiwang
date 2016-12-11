@@ -36,8 +36,8 @@ namespace jiwang
 
         public void writeMsg(string msg)
         {
-            textBoxMsgReceive.Text += msg;
-            textBoxMsgReceive.Text += Environment.NewLine;
+            textBoxMsgReceive.AppendText(msg);
+            textBoxMsgReceive.AppendText(Environment.NewLine);
         }
 
         private void FormMain_Load(object sender, EventArgs e)
