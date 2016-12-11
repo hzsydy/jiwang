@@ -95,12 +95,6 @@ namespace jiwang
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //FormMain fm = new FormMain();
-            //fm.Show();
-        }
-
         public void refreshFriendList(IEnumerable<string> keys)
         {
             listBoxFriend.Items.Clear();
@@ -108,6 +102,10 @@ namespace jiwang
             {
                 listBoxFriend.Items.Add(s);
             };
+            if (listBoxFriend.SelectedIndex == -1)
+            {
+                listBoxFriend.SelectedIndex = 0;
+            }
         }
 
         private void buttonAddFriend_Click(object sender, EventArgs e)
@@ -150,6 +148,25 @@ namespace jiwang
                 catch (System.Exception ex)
                 {
                 	 writeError(ex);
+                }
+            }
+        }
+
+        private void buttonSendFile_Click(object sender, EventArgs e)
+        {
+            if (listBoxFriend.SelectedIndex > -1)
+            {
+                string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
+                string text = textBoxMsgSend.Text;
+                try
+                {
+                    ChatLink cl = ls.getChatLink(username);
+                    cl.sendMsg(common.type_str_text, text);
+                    textBoxMsgSend.Text = string.Empty;
+                }
+                catch (System.Exception ex)
+                {
+                    writeError(ex);
                 }
             }
         }

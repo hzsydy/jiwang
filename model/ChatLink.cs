@@ -23,7 +23,7 @@ namespace jiwang.model
         
         Socket sendSocket;
 
-        byte[] buffer = new byte[1024];
+        //byte[] buffer = new byte[common.buffersize];
 
         public bool linked { get { return sendSocket.Connected; } }
 
@@ -40,7 +40,7 @@ namespace jiwang.model
             sendSocket.SendBufferSize = 8192;
             sendSocket.SendTimeout = 1000;
 
-            
+            allDone = new ManualResetEvent(false);
         }
 
         public void start()
@@ -144,37 +144,67 @@ namespace jiwang.model
             }
         }
 
+        public class StateObject
+        {
+            public Socket workSocket = null;
+            public byte[] data;
+            public int sendPos = 0;
+        }
+
+        ManualResetEvent allDone;
 
         void SendCallback(IAsyncResult ar)
         {
-            Socket handler = (Socket)ar.AsyncState;
+            StateObject state = (StateObject)ar.AsyncState;
+            Socket handler = state.workSocket;
             int bytesSent = handler.EndSend(ar);
+            if (bytesSent > 0)
+            {
+                state.sendPos += bytesSent;
+                if (state.sendPos < state.data.Length)
+                {
+                    sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                        new AsyncCallback(SendCallback), state);
+                }
+                else
+                {
+                    allDone.Set();
+                }
+            }
         }
 
-        public void sendMsg(string type_str, string message)
+        public void sendMsg(string type_str, byte[] msg)
         {
-            byte[] msg = Encoding.Unicode.GetBytes(message);
-            
+            StateObject state = new StateObject();
+
             byte[] msg_len = common.str2ascii(
                 msg.Length.ToString(), common.msglen_length);
-            
+
             byte[] type_header = common.str2ascii(
                 type_str, common.type_header_length);
             byte[] name_header = common.str2ascii(
                 sl.getUserName(), common.name_header_length);
 
-            type_header.CopyTo(buffer, 0);
-            name_header.CopyTo(buffer, common.type_header_length);
-            msg_len.CopyTo(buffer, common.msglen_position);
-            msg.CopyTo(buffer, common.msg_position);
-            
+            state.workSocket = sendSocket;
+            List<Byte> data = new List<Byte>();
+            data.AddRange(type_header);
+            data.AddRange(name_header);
+            data.AddRange(msg_len);
+            data.AddRange(msg);
+            state.data = data.ToArray();
+
             // Send the data through the socket.
-            sendSocket.BeginSend(buffer, 0, buffer.Length, 0,
-                new AsyncCallback(SendCallback), sendSocket);
-            
+            allDone.WaitOne();
+            sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                new AsyncCallback(SendCallback), state);
+
             if (type_str == common.type_str_text)
             {
-                ls.writeMsg("you send : " + message);
+                Console.WriteLine("sending text");
+            }
+            else if (type_str == common.type_str_file)
+            {
+                Console.WriteLine("sending file");
             }
             else if (type_str == common.type_str_ping)
             {
@@ -185,5 +215,60 @@ namespace jiwang.model
                 Console.WriteLine("sending echo");
             }
         }
+
+        public void sendMsg(string type_str, string message)
+        {
+            byte[] msg = Encoding.Unicode.GetBytes(message);
+
+            sendMsg(type_str, msg);
+
+            if (type_str == common.type_str_text)
+            {
+                ls.writeMsg("you send : " + message);
+            }
+        }
+
+        //public void sendMsg(string type_str, string message)
+        //{
+        //    byte[] msg = Encoding.Unicode.GetBytes(message);
+        //
+        //    if (msg.Length > 900)
+        //    {
+        //        throw new Exception("您一次发送了太多内容");
+        //    }
+        //    
+        //    byte[] msg_len = common.str2ascii(
+        //        msg.Length.ToString(), common.msglen_length);
+        //    
+        //    byte[] type_header = common.str2ascii(
+        //        type_str, common.type_header_length);
+        //    byte[] name_header = common.str2ascii(
+        //        sl.getUserName(), common.name_header_length);
+        //
+        //    type_header.CopyTo(buffer, 0);
+        //    name_header.CopyTo(buffer, common.type_header_length);
+        //    msg_len.CopyTo(buffer, common.msglen_position);
+        //    msg.CopyTo(buffer, common.msg_position);
+        //    
+        //
+        //
+        //
+        //    // Send the data through the socket.
+        //    sendSocket.BeginSend(buffer, 0, buffer.Length, 0,
+        //        new AsyncCallback(SendCallback), sendSocket);
+        //    
+        //    if (type_str == common.type_str_text)
+        //    {
+        //        ls.writeMsg("you send : " + message);
+        //    }
+        //    else if (type_str == common.type_str_ping)
+        //    {
+        //        Console.WriteLine("sending ping");
+        //    }
+        //    else if (type_str == common.type_str_echo)
+        //    {
+        //        Console.WriteLine("sending echo");
+        //    }
+        //}
     }
 }

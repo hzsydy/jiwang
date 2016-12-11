@@ -11,9 +11,10 @@ namespace jiwang.model
         public const int p2p_port = 23333;
         public const int name_header_length = 16;
         public const int type_header_length = 4;
-        public const int msglen_length = 4;
+        public const int msglen_length = 10;
         public const int msglen_position = 20;
-        public const int msg_position = 24;
+        public const int msg_position = 30;
+        public const int buffersize = 1024;
 
         public const string type_str_text = "text";
         public const string type_str_file = "file";

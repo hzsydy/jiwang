@@ -40,10 +40,10 @@
             this.buttonAddFriend = new System.Windows.Forms.Button();
             this.listBoxFriend = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBoxMsgSend = new System.Windows.Forms.TextBox();
             this.textBoxMsgReceive = new System.Windows.Forms.TextBox();
+            this.buttonSendFile = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -162,7 +162,7 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.button1);
+            this.groupBox3.Controls.Add(this.buttonSendFile);
             this.groupBox3.Controls.Add(this.buttonSend);
             this.groupBox3.Controls.Add(this.textBoxMsgSend);
             this.groupBox3.Controls.Add(this.textBoxMsgReceive);
@@ -172,16 +172,6 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "聊天窗口";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(9, 353);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(72, 21);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "双开";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // buttonSend
             // 
@@ -209,6 +199,16 @@
             this.textBoxMsgReceive.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxMsgReceive.Size = new System.Drawing.Size(514, 330);
             this.textBoxMsgReceive.TabIndex = 0;
+            // 
+            // buttonSendFile
+            // 
+            this.buttonSendFile.Location = new System.Drawing.Point(9, 353);
+            this.buttonSendFile.Name = "buttonSendFile";
+            this.buttonSendFile.Size = new System.Drawing.Size(72, 21);
+            this.buttonSendFile.TabIndex = 3;
+            this.buttonSendFile.Text = "发送文件";
+            this.buttonSendFile.UseVisualStyleBackColor = true;
+            this.buttonSendFile.Click += new System.EventHandler(this.buttonSendFile_Click);
             // 
             // FormMain
             // 
@@ -247,7 +247,7 @@
         private System.Windows.Forms.TextBox textBoxMsgReceive;
         private System.Windows.Forms.TextBox textBoxMsgSend;
         private System.Windows.Forms.Button buttonSend;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonSendFile;
     }
 }
 
