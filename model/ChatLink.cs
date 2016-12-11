@@ -40,7 +40,6 @@ namespace jiwang.model
             sendSocket.SendBufferSize = 8192;
             sendSocket.SendTimeout = 1000;
 
-            allDone = new ManualResetEvent(false);
         }
 
         public void start()
@@ -151,7 +150,6 @@ namespace jiwang.model
             public int sendPos = 0;
         }
 
-        ManualResetEvent allDone;
 
         void SendCallback(IAsyncResult ar)
         {
@@ -168,7 +166,7 @@ namespace jiwang.model
                 }
                 else
                 {
-                    allDone.Set();
+                    //allDone.Set();
                 }
             }
         }
@@ -194,9 +192,17 @@ namespace jiwang.model
             state.data = data.ToArray();
 
             // Send the data through the socket.
-            allDone.WaitOne();
-            sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                new AsyncCallback(SendCallback), state);
+            // allDone.WaitOne();
+            if (state.data.Length - state.sendPos >= common.buffersize)
+            {
+                sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                    new AsyncCallback(SendCallback), state);
+            }
+            else
+            {
+                sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                    new AsyncCallback(SendCallback), state);
+            }
 
             if (type_str == common.type_str_text)
             {
