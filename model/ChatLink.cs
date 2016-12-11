@@ -146,7 +146,7 @@ namespace jiwang.model
             {
                 Console.WriteLine("receive file name");
                 nextFileName = common.unicode2Str(msg);
-                ls.writeMsg(dst_username + "向您发送了文件" + nextFileName);
+                ls.writeMsg(dst_username + "向您发送了文件 " + nextFileName);
             }
         }
 

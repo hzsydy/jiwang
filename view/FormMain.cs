@@ -169,22 +169,20 @@ namespace jiwang
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     localFilePath = openFileDialog.FileName.ToString();
-                    Match match = Regex.Match(localFilePath, @"(\w+\.\w+)\n");
-                    if (match.Success)
-                    {
-                        string filename = match.Value;
-                        try
-                        {
-                            byte[] bytes = File.ReadAllBytes(localFilePath);
 
-                            ChatLink cl = ls.getChatLink(username);
-                            cl.sendMsg(common.type_str_filename, filename);
-                            cl.sendMsg(common.type_str_file, bytes);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            writeError(ex);
-                        }
+                    string filename = Path.GetFileName(localFilePath);
+                    try
+                    {
+                        byte[] bytes = File.ReadAllBytes(localFilePath);
+
+                        ChatLink cl = ls.getChatLink(username);
+                        cl.sendMsg(common.type_str_filename, filename);
+                        cl.sendMsg(common.type_str_file, bytes);
+                        writeMsg("您向" + username + "发送了文件 " + filename);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        writeError(ex);
                     }
                 }
             }
@@ -200,6 +198,7 @@ namespace jiwang
                 {
                     string filepath = folderBrowserDialog.SelectedPath + @"\" + filename;
                     File.WriteAllBytes(filepath, bytes);
+                    writeMsg("文件已保存到" + filepath);
                 }
             }
             catch (System.Exception ex)
