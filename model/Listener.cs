@@ -126,9 +126,10 @@ namespace jiwang.model
         {
             working = false; 
             listenSocket.Close();
-            while (reg_chatlinks.Count > 0)
+            string[] users = reg_chatlinks.Keys.ToArray();
+            foreach (string u in users)
             {
-                unregister(reg_chatlinks.Keys.First());
+                unregister(u);
             }
         }
 
