@@ -26,6 +26,9 @@ namespace jiwang.model
         public const string type_str_ping = "ping";
         public const string type_str_echo = "echo";
 
+        public const string type_str_invite_group = "ivgp";
+        public const string type_str_quit_group = "qtgp";
+
 
         public static string unicode2Str(byte[] buffer)
         {
@@ -48,7 +51,6 @@ namespace jiwang.model
 
         public static string ascii2Str(List<byte> buffer)
         {
-
             return ascii2Str(buffer.ToArray());
         }
 

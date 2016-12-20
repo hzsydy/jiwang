@@ -49,6 +49,12 @@
     <Compile Include="model\common.cs" />
     <Compile Include="model\Listener.cs" />
     <Compile Include="model\ServerLink.cs" />
+    <Compile Include="view\FormAddGroup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\FormAddGroup.Designer.cs">
+      <DependentUpon>FormAddGroup.cs</DependentUpon>
+    </Compile>
     <Compile Include="view\FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -66,6 +72,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="view\FormAddGroup.resx">
+      <DependentUpon>FormAddGroup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="view\FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>

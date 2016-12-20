@@ -14,24 +14,34 @@ namespace jiwang.model
     {
         ServerLink sl;
         Listener ls;
-        string dst_username;
+        string chatname;
 
-        public string getDstUserName()
+        public string getChatName()
         {
-            return dst_username;
+            return chatname;
         }
-        
-        Socket sendSocket;
 
-        //byte[] buffer = new byte[common.buffersize];
+        struct link 
+        {
+            public string dst_username;
+            public Socket sendSocket;
+            public bool linked { get { return sendSocket.Connected; } }
+        }
 
-        public bool linked { get { return sendSocket.Connected; } }
+        List<link> links;
 
-        public ChatLink(ServerLink sl, Listener ls, string dst_username)
+        public ChatLink(ServerLink sl, Listener ls, string chatname)
         {
             this.sl = sl;
             this.ls = ls;
-            this.dst_username = dst_username;
+            this.chatname = chatname;
+            links = new List<link>();
+            AddUser(sl.getUserName());
+        }
+
+        public void AddUser(string dst_username)
+        {
+            Socket sendSocket;
             sendSocket = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
 
@@ -39,114 +49,150 @@ namespace jiwang.model
             sendSocket.ReceiveTimeout = 1000;
             sendSocket.SendBufferSize = 8192;
             sendSocket.SendTimeout = 1000;
-
+            link l;
+            l.dst_username = dst_username;
+            l.sendSocket = sendSocket;
+            links.Add(l);
         }
 
         public void start()
         {
-            checkDstOnline();
-            using (BackgroundWorker bw = new BackgroundWorker())
+            foreach (link l in links) 
             {
-                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                try
                 {
-                    if (linked)
-                    {
-                        ping();
-                        Thread.Sleep(common.ping_interval);
-                    }
-                };
-                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                    checkDstOnline(l);
+                }
+                catch (System.Exception ex)
                 {
-                    if (ea.Error != null)
-                    {
-                        ls.writeMsg(ea.Error.Message);
-                        ls.unregister(dst_username);
-                    }
-                    else
-                    {
-                        bw.RunWorkerAsync();
-                    }
-                };
-                bw.RunWorkerAsync();
+                    ls.writeError(ex);
+                }
+                //using (BackgroundWorker bw = new BackgroundWorker())
+                //{
+                //    bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                //    {
+                //        if (l.linked)
+                //        {
+                //            ping();
+                //            Thread.Sleep(common.ping_interval);
+                //        }
+                //    };
+                //    bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                //    {
+                //        if (ea.Error != null)
+                //        {
+                //            ls.writeMsg(ea.Error.Message);
+                //            ls.unregister(dst_username);
+                //        }
+                //    };
+                //    bw.RunWorkerAsync();
+                //}
             }
+            //Broadcast it
+            List<Byte> data = new List<Byte>();
+            foreach (link l in links)
+            {
+                byte[] name_header = common.str2ascii(
+                    l.dst_username, common.name_header_length);
+                data.AddRange(name_header);
+            }
+            sendMsg(common.type_str_invite_group, data.ToArray());
         }
 
         public void stop()
         {
-            sendSocket.Close();
+            foreach (link l in links)
+            {
+                l.sendSocket.Shutdown(SocketShutdown.Both);
+                l.sendSocket.Close();
+            }
         }
 
-        public void checkDstOnline()
+        void checkDstOnline(link l)
         {
             string dst_ip = null;
             if (!sl.linked) throw new Exception("您已离线.");
-            sl.query4IP(dst_username, out dst_ip);
+            sl.query4IP(l.dst_username, out dst_ip);
             IPAddress addr = IPAddress.Parse(dst_ip);
             IPEndPoint endpoint = new IPEndPoint(addr, common.p2p_port);
 
-            if (!linked)
+            if (!l.linked)
             {
                 bool done = false;
-                sendSocket.BeginConnect(endpoint.Address, endpoint.Port,
+                l.sendSocket.BeginConnect(endpoint.Address, endpoint.Port,
                     new AsyncCallback((IAsyncResult ar) =>
                     {
                         done = true;
                         Socket s = (Socket)ar.AsyncState;
                         s.EndConnect(ar);
-                    }), sendSocket);
+                    }), l.sendSocket);
                 while (!done)
                 {
                     ;
                 }
             }
-            if (!linked) throw new Exception("无法连接服务器！");
+            if (!l.linked) throw new Exception("无法连接"+l.dst_username+"的IP地址。");
         }
 
-        public void ping()
-        {
-            if (linked)
-            {
-                echoreceived = false;
-                sendMsg(common.type_str_ping, "");
-                Thread.Sleep(common.ping_timeout);
-                if (!echoreceived)
-                {
-                    throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
-                }
-            }
-        }
+        //public void ping()
+        //{
+        //    echoreceived = false;
+        //    sendMsg(common.type_str_ping, "");
+        //    Thread.Sleep(common.ping_timeout);
+        //    if (!echoreceived)
+        //    {
+        //        throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
+        //    }
+        //}
 
-        bool echoreceived = false;
+        //bool echoreceived = false;
         string nextFileName = string.Empty;
 
-        public void onReceive(string type_str, byte[] msg)
+        public virtual void onReceive(string type_str, byte[] msg)
         {
+            Console.WriteLine("receive " + type_str);
             if (type_str == common.type_str_text)
             {
-                Console.WriteLine("receive text");
                 string str_msg = common.unicode2Str(msg);
-                ls.writeMsg(dst_username + ":" + str_msg);
+                ls.writeMsg(str_msg);
             }
             else if (type_str == common.type_str_file)
             {
-                Console.WriteLine("receive file");
                 ls.writeFile(nextFileName, msg);
             } 
             else if (type_str == common.type_str_ping)
             {
-                Console.WriteLine("receive ping");
-                sendMsg(common.type_str_echo, "");
+                //sendMsg(common.type_str_echo, "");
             }
             else if (type_str == common.type_str_echo)
             {
-                Console.WriteLine("receive echo");
-                echoreceived = true;
+                //echoreceived = true;
             }
             else if (type_str == common.type_str_filename)
             {
-                Console.WriteLine("receive file name");
                 nextFileName = common.unicode2Str(msg);
-                ls.writeMsg(dst_username + "向您发送了文件 " + nextFileName);
+            }
+            else if (type_str == common.type_str_invite_group)
+            {
+                List<byte> lb_msg = new List<byte>(msg);
+                int len = common.name_header_length;
+                int usernum = msg.Length / len;
+                for (int i = 0; i < usernum; i++ )
+                {
+                    string username = common.ascii2Str(lb_msg.GetRange(i * len, len));
+                    bool exist = false;
+                    foreach (link l in links)
+                    {
+                        if (username == l.dst_username)
+                        {
+                            exist = true;
+                        }
+                    }
+                    if (!exist)
+                    {
+                        AddUser(username);
+                    }
+                }
             }
         }
 
@@ -156,7 +202,6 @@ namespace jiwang.model
             public byte[] data;
             public int sendPos = 0;
         }
-
 
         void SendCallback(IAsyncResult ar)
         {
@@ -172,12 +217,12 @@ namespace jiwang.model
                     {
                         if (state.data.Length - state.sendPos >= common.buffersize)
                         {
-                            sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                            handler.BeginSend(state.data, state.sendPos, common.buffersize, 0,
                                 new AsyncCallback(SendCallback), state);
                         }
                         else
                         {
-                            sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                            handler.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
                                 new AsyncCallback(SendCallback), state);
                         }
                     }
@@ -193,9 +238,10 @@ namespace jiwang.model
             }
         }
 
-        public void sendMsg(string type_str, byte[] msg)
+        public virtual void sendMsg(string type_str, byte[] msg)
         {
-            StateObject state = new StateObject();
+
+            Console.WriteLine("send " + type_str);
 
             byte[] msg_len = common.str2ascii(
                 msg.Length.ToString(), common.msglen_length);
@@ -205,41 +251,28 @@ namespace jiwang.model
             byte[] name_header = common.str2ascii(
                 sl.getUserName(), common.name_header_length);
 
-            state.workSocket = sendSocket;
-            List<Byte> data = new List<Byte>();
-            data.AddRange(type_header);
-            data.AddRange(name_header);
-            data.AddRange(msg_len);
-            data.AddRange(msg);
-            state.data = data.ToArray();
+            foreach (link l in links)
+            {
+                StateObject state = new StateObject();
+                state.workSocket = l.sendSocket;
+                List<Byte> data = new List<Byte>();
+                data.AddRange(type_header);
+                data.AddRange(name_header);
+                data.AddRange(msg_len);
+                data.AddRange(msg);
+                state.data = data.ToArray();
 
-            // Send the data through the socket.
-            if (state.data.Length - state.sendPos >= common.buffersize)
-            {
-                sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                    new AsyncCallback(SendCallback), state);
-            }
-            else
-            {
-                sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                    new AsyncCallback(SendCallback), state);
-            }
-
-            if (type_str == common.type_str_text)
-            {
-                Console.WriteLine("sending text");
-            }
-            else if (type_str == common.type_str_file)
-            {
-                Console.WriteLine("sending file");
-            }
-            else if (type_str == common.type_str_ping)
-            {
-                Console.WriteLine("sending ping");
-            }
-            else if (type_str == common.type_str_echo)
-            {
-                Console.WriteLine("sending echo");
+                // Send the data through the socket.
+                if (state.data.Length - state.sendPos >= common.buffersize)
+                {
+                    l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                        new AsyncCallback(SendCallback), state);
+                }
+                else
+                {
+                    l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                        new AsyncCallback(SendCallback), state);
+                }
             }
         }
 
@@ -249,10 +282,10 @@ namespace jiwang.model
 
             sendMsg(type_str, msg);
 
-            if (type_str == common.type_str_text)
-            {
-                ls.writeMsg("you send : " + message);
-            }
+            //if (type_str == common.type_str_text)
+            //{
+            //    ls.writeMsg("you send : " + message);
+            //}
         }
     }
 }

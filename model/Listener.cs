@@ -44,6 +44,7 @@ namespace jiwang.model
             {
                 ChatLink cl = new ChatLink(sl, this, username);
                 reg_chatlinks.Add(username, cl);
+                cl.AddUser(username);
                 cl.start();
                 if (form != null)
                 {
@@ -71,6 +72,14 @@ namespace jiwang.model
             if (form != null)
             {
                 form.BeginInvoke((Action)delegate { form.writeMsg(msg); });
+            }
+        }
+
+        public void writeError(Exception ex)
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.writeError(ex); });
             }
         }
 

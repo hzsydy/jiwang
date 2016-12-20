@@ -28,7 +28,7 @@ namespace jiwang
             ls.form  = this;
         }
 
-        void writeError(Exception ex)
+        public void writeError(Exception ex)
         {
             if (ex != null)
             {
@@ -140,7 +140,13 @@ namespace jiwang
             if (listBoxFriend.SelectedIndex > -1)
             {
                 string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
-                string text = textBoxMsgSend.Text;
+                string text = string.Format(
+                    "{0} {1:MM-dd H:mm:ss}{2}", 
+                    sl.getUserName(),
+                    DateTime.Now,
+                    Environment.NewLine
+                    );
+                text += textBoxMsgSend.Text;
                 try
                 {
                     ChatLink cl = ls.getChatLink(username);
@@ -176,9 +182,17 @@ namespace jiwang
                         byte[] bytes = File.ReadAllBytes(localFilePath);
 
                         ChatLink cl = ls.getChatLink(username);
+
+                        string text = string.Format(
+                            "{0} 在 {1:MM-dd H:mm:ss} 分享了文件{2}", 
+                            sl.getUserName(),
+                            DateTime.Now,
+                            filename
+                            );
+
+                        cl.sendMsg(common.type_str_text, text);
                         cl.sendMsg(common.type_str_filename, filename);
                         cl.sendMsg(common.type_str_file, bytes);
-                        writeMsg("您向" + username + "发送了文件 " + filename);
                     }
                     catch (System.Exception ex)
                     {
