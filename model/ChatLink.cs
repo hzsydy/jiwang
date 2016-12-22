@@ -249,7 +249,7 @@ namespace jiwang.model
             byte[] type_header = common.str2ascii(
                 type_str, common.type_header_length);
             byte[] name_header = common.str2ascii(
-                sl.getUserName(), common.name_header_length);
+                getChatName(), common.name_header_length);
 
             foreach (link l in links)
             {
@@ -281,11 +281,6 @@ namespace jiwang.model
             byte[] msg = Encoding.Unicode.GetBytes(message);
 
             sendMsg(type_str, msg);
-
-            //if (type_str == common.type_str_text)
-            //{
-            //    ls.writeMsg("you send : " + message);
-            //}
         }
     }
 }
