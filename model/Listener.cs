@@ -37,32 +37,46 @@ namespace jiwang.model
         }
 
         public FormMain form { get; set; }
-        
-        public void register(string username)
+
+        public ChatLink register(string chatname)
         {
-            if (!reg_chatlinks.ContainsKey(username))
+            if (!reg_chatlinks.ContainsKey(chatname))
             {
-                ChatLink cl = new ChatLink(sl, this, username);
-                reg_chatlinks.Add(username, cl);
-                cl.AddUser(username);
-                cl.start();
+                ChatLink new_cl = new ChatLink(sl, this, chatname);
+                reg_chatlinks.Add(chatname, new_cl);
                 if (form != null)
                 {
-                    form.BeginInvoke((Action)delegate{ form.refreshFriendList(reg_chatlinks.Keys); });
+                    form.BeginInvoke((Action)delegate{ form.refreshFriendList(reg_chatlinks); });
                 }
-            } 
+            }
+            ChatLink cl = reg_chatlinks[chatname];
+            return cl;
         }
 
-        public void unregister(string username)
+        public void unregister(string chatname)
         {
-            if (reg_chatlinks.ContainsKey(username))
+            if (reg_chatlinks.ContainsKey(chatname))
             {
-                ChatLink cl = reg_chatlinks[username];
+                ChatLink cl = reg_chatlinks[chatname];
                 cl.stop();
-                reg_chatlinks.Remove(username);
+                reg_chatlinks.Remove(chatname);
                 if (form != null)
                 {
-                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks.Keys); });
+                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                }
+            }
+        }
+
+        public void changeName(string oldname, string newname)
+        {
+            if (reg_chatlinks.ContainsKey(oldname))
+            {
+                ChatLink cl = reg_chatlinks[oldname];
+                reg_chatlinks.Remove(oldname);
+                reg_chatlinks.Add(newname, cl);
+                if (form != null)
+                {
+                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
                 }
             }
         }
@@ -213,12 +227,10 @@ namespace jiwang.model
                         List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
 
                         string type_str = common.ascii2Str(type_header);
-                        string src_username = common.ascii2Str(name_header);
+                        string chatname = common.ascii2Str(name_header);
+                        
+                        ChatLink cl = register(chatname);
 
-
-                        register(src_username);
-
-                        ChatLink cl = reg_chatlinks[src_username];
                         cl.onReceive(type_str, msg.ToArray());
                         state = new StateObject();
                         state.workSocket = handler;

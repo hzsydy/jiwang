@@ -10,18 +10,25 @@ using System.ComponentModel;
 
 namespace jiwang.model
 {
+
+
     public class ChatLink
     {
         ServerLink sl;
         Listener ls;
+
         string chatname;
 
-        public string getChatName()
+        string nickname;
+        public string Nickname
         {
-            return chatname;
+            get
+            {
+                return nickname;
+            }
         }
 
-        struct link 
+        struct link
         {
             public string dst_username;
             public Socket sendSocket;
@@ -35,8 +42,8 @@ namespace jiwang.model
             this.sl = sl;
             this.ls = ls;
             this.chatname = chatname;
+            this.nickname = "untitled";
             links = new List<link>();
-            AddUser(sl.getUserName());
         }
 
         public void AddUser(string dst_username)
@@ -177,6 +184,22 @@ namespace jiwang.model
                 List<byte> lb_msg = new List<byte>(msg);
                 int len = common.name_header_length;
                 int usernum = msg.Length / len;
+                if (usernum == 2)
+                {
+                    //这是个两人群
+                    //也就是单独聊天
+                    string username1 = common.ascii2Str(lb_msg.GetRange(0, len));
+                    string username2 = common.ascii2Str(lb_msg.GetRange(len, len));
+                    
+                    if (username1 != sl.getUserName())
+                    {
+                        nickname = username1;
+                    }
+                    else
+                    {
+                        nickname = username2;
+                    }
+                }
                 for (int i = 0; i < usernum; i++ )
                 {
                     string username = common.ascii2Str(lb_msg.GetRange(i * len, len));
@@ -191,8 +214,17 @@ namespace jiwang.model
                     if (!exist)
                     {
                         AddUser(username);
+                        try
+                        {
+                            start();
+                        }
+                        catch (System.Exception ex)
+                        {
+                            ls.writeError(ex);
+                        }
                     }
                 }
+                
             }
         }
 
@@ -249,7 +281,7 @@ namespace jiwang.model
             byte[] type_header = common.str2ascii(
                 type_str, common.type_header_length);
             byte[] name_header = common.str2ascii(
-                getChatName(), common.name_header_length);
+                chatname, common.name_header_length);
 
             foreach (link l in links)
             {

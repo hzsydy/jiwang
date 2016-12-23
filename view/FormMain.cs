@@ -26,6 +26,8 @@ namespace jiwang
 
             ls = new Listener(sl);
             ls.form  = this;
+
+            listBoxFriend.DisplayMember = "Nickname";
         }
 
         public void writeError(Exception ex)
@@ -97,12 +99,13 @@ namespace jiwang
             }
         }
 
-        public void refreshFriendList(IEnumerable<string> keys)
+        public void refreshFriendList(Dictionary<string, ChatLink> regdict)
         {
+            //TODO
             listBoxFriend.Items.Clear();
-            foreach (string s in keys)
+            foreach (string s in regdict.Keys)
             {
-                listBoxFriend.Items.Add(s);
+                listBoxFriend.Items.Add(regdict[s]);
             };
             if (listBoxFriend.Items.Count > 0 && listBoxFriend.SelectedIndex == -1)
             {
@@ -113,11 +116,15 @@ namespace jiwang
         private void buttonAddFriend_Click(object sender, EventArgs e)
         {
             string newuser = Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493");
+            string chatname = common.generateIdentifier(common.name_header_length);
             using (BackgroundWorker bw = new BackgroundWorker())
             {
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
-                    ls.register(newuser);
+                    ChatLink cl = ls.register(chatname);
+                    cl.AddUser(sl.getUserName());
+                    cl.AddUser(newuser);
+                    cl.start();
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
@@ -139,7 +146,6 @@ namespace jiwang
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
-                string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
                 string text = string.Format(
                     "{0} {1:MM-dd H:mm:ss}{2}", 
                     sl.getUserName(),
@@ -149,7 +155,7 @@ namespace jiwang
                 text += textBoxMsgSend.Text;
                 try
                 {
-                    ChatLink cl = ls.getChatLink(username);
+                    ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
                     cl.sendMsg(common.type_str_text, text);
                     textBoxMsgSend.Text = string.Empty;
                 }
@@ -165,7 +171,6 @@ namespace jiwang
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
-                string username = (string)listBoxFriend.Items[listBoxFriend.SelectedIndex];
                 string localFilePath = String.Empty;
                 OpenFileDialog openFileDialog = new OpenFileDialog();
                 openFileDialog.Filter = "所有文件(*.*)|*.*";
@@ -180,8 +185,8 @@ namespace jiwang
                     try
                     {
                         byte[] bytes = File.ReadAllBytes(localFilePath);
-
-                        ChatLink cl = ls.getChatLink(username);
+                        
+                        ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
 
                         string text = string.Format(
                             "{0} 在 {1:MM-dd H:mm:ss} 分享了文件{2}", 
