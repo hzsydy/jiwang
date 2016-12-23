@@ -24,8 +24,6 @@ namespace jiwang.model
 
         private Object thisLock = new Object();  
 
-        byte[] buffer = new byte[common.buffersize];
-
         public Listener(ServerLink sl)
         {
             this.sl = sl;
@@ -182,6 +180,9 @@ namespace jiwang.model
             public Socket workSocket = null;
             // Received data.
             public List<Byte> data = new List<Byte>();
+            // buffer
+            public byte[] buffer = new byte[common.buffersize];
+
         }
 
         void acceptCallback(IAsyncResult ar)
@@ -195,8 +196,8 @@ namespace jiwang.model
                 Socket handler = listener.EndAccept(ar);
                 StateObject state = new StateObject();
                 state.workSocket = handler;
-                buffer = new byte[common.buffersize];
-                handler.BeginReceive(buffer, 0, buffer.Length, 0,
+                state.buffer = new byte[common.buffersize];
+                handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
                     new AsyncCallback(readCallback), state);
             }
             catch (System.Exception ex)
@@ -218,41 +219,45 @@ namespace jiwang.model
                 int bytesRead = handler.EndReceive(ar);
                 if (bytesRead > 0)
                 {
-                    state.data.AddRange(new List<Byte>(buffer).GetRange(0, bytesRead));
-
-                    int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
-                        common.type_header_length + common.name_header_length,
-                        common.msglen_length))
-                        );
-
-                    int expect_len = common.name_header_length + common.type_header_length +
-                        common.msglen_length + msg_len;
-
-                    if (state.data.Count >= expect_len)
+                    state.data.AddRange(new List<Byte>(state.buffer).GetRange(0, bytesRead));
+                    if (bytesRead >= common.msg_position)
                     {
-                        //all data received. parse it
+                        Console.WriteLine("receive:" + common.ascii2Str(state.data));
 
-                        List<byte> type_header = state.data.GetRange(0, common.type_header_length);
-                        List<byte> name_header = state.data.GetRange(
-                            common.type_header_length, common.name_header_length);
-                        List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
+                        int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
+                            common.type_header_length + common.name_header_length,
+                            common.msglen_length))
+                            );
 
-                        string type_str = common.ascii2Str(type_header);
-                        string chatname = common.ascii2Str(name_header);
+                        int expect_len = common.name_header_length + common.type_header_length +
+                            common.msglen_length + msg_len;
 
-                        lock (thisLock)
+                        if (state.data.Count >= expect_len)
                         {
-                            ChatLink cl = register(chatname);
+                            //all data received. parse it
 
-                            cl.onReceive(type_str, msg.ToArray());
+                            List<byte> type_header = state.data.GetRange(0, common.type_header_length);
+                            List<byte> name_header = state.data.GetRange(
+                                common.type_header_length, common.name_header_length);
+                            List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
+
+                            string type_str = common.ascii2Str(type_header);
+                            string chatname = common.ascii2Str(name_header);
+
+                            lock (thisLock)
+                            {
+                                ChatLink cl = register(chatname);
+
+                                cl.onReceive(type_str, msg.ToArray());
+                            }
+                            state = new StateObject();
+                            state.workSocket = handler;
+                            state.buffer = new byte[common.buffersize];
                         }
-                        state = new StateObject();
-                        state.workSocket = handler;
                     }
 
-                    buffer = new byte[common.buffersize];
                     // Not all data received. Get more.
-                    handler.BeginReceive(buffer, 0, buffer.Length, 0,
+                    handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
                         new AsyncCallback(readCallback), state);
                 }
             }

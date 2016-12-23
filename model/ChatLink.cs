@@ -298,6 +298,7 @@ namespace jiwang.model
                     data.AddRange(msg_len);
                     data.AddRange(msg);
                     state.data = data.ToArray();
+                    Console.WriteLine("send:" + common.ascii2Str(state.data));
                     try
                     {
                         // Send the data through the socket.
