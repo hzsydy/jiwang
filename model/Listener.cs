@@ -15,11 +15,14 @@ namespace jiwang.model
 
         Socket listenSocket;
         const int backlog = 10;
+
         ServerLink sl;
+
         Dictionary<string, ChatLink> reg_chatlinks;
 
         bool working = false;
         bool isRunning() { return working; }
+
         ManualResetEvent allDone;
 
         private Object thisLock = new Object();  

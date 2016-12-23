@@ -296,22 +296,23 @@ namespace jiwang.model
 
             lock (thisLock)
             {
+                List<Byte> data = new List<Byte>();
+                data.AddRange(type_header);
+                data.AddRange(name_header);
+                data.AddRange(msg_len);
+                data.AddRange(msg);
+                Console.WriteLine("send:" + common.ascii2Str(data));
                 foreach (link l in links)
                 {
                     StateObject state = new StateObject();
                     state.workSocket = l.sendSocket;
-                    List<Byte> data = new List<Byte>();
-                    data.AddRange(type_header);
-                    data.AddRange(name_header);
-                    data.AddRange(msg_len);
-                    data.AddRange(msg);
                     state.data = data.ToArray();
-                    Console.WriteLine("send:" + common.ascii2Str(state.data));
                     try
                     {
                         // Send the data through the socket.
                         if (state.data.Length - state.sendPos >= common.buffersize)
                         {
+
                             l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
                                 new AsyncCallback(SendCallback), state);
                         }
