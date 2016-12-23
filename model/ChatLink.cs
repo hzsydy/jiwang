@@ -258,9 +258,6 @@ namespace jiwang.model
                 StateObject state = (StateObject)ar.AsyncState;
                 Socket handler = state.workSocket;
 
-                if (state.l.dst_username != sl.getUserName())
-                    Console.WriteLine("endsend:" + state.l.dst_username + " " + common.ascii2Str(state.data));
-
                 int bytesSent = handler.EndSend(ar);
                 if (bytesSent > 0)
                 {
@@ -280,6 +277,8 @@ namespace jiwang.model
                     }
                     else
                     {
+                        if (state.l.dst_username != sl.getUserName())
+                            Console.WriteLine("endsend:" + state.l.dst_username + " " + common.ascii2Str(state.data));
                         state.l.canSend.Set();
                     }
                 }
@@ -311,46 +310,34 @@ namespace jiwang.model
                 data.AddRange(msg);
                 foreach (link l in links)
                 {
-                    using (BackgroundWorker bw = new BackgroundWorker())
+                    l.canSend.WaitOne();
+                    StateObject state = new StateObject();
+                    state.workSocket = l.sendSocket;
+                    state.data = data.ToArray();
+                    state.l = l;
+
+                    if (l.dst_username != sl.getUserName())
+                        Console.WriteLine("beginsend:" + l.dst_username + " " + common.ascii2Str(data));
+
+                    try
                     {
-                        bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                        // Send the data through the socket.
+                        if (state.data.Length - state.sendPos >= common.buffersize)
                         {
-                            l.canSend.WaitOne();
-                            StateObject state = new StateObject();
-                            state.workSocket = l.sendSocket;
-                            state.data = data.ToArray();
-                            state.l = l;
 
-                            if (l.dst_username != sl.getUserName())
-                                Console.WriteLine("beginsend:" + l.dst_username + " " + common.ascii2Str(data));
-
-                            try
-                            {
-                                // Send the data through the socket.
-                                if (state.data.Length - state.sendPos >= common.buffersize)
-                                {
-
-                                    l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                                        new AsyncCallback(SendCallback), state);
-                                }
-                                else
-                                {
-                                    l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                                        new AsyncCallback(SendCallback), state);
-                                }
-                            }
-                            catch (System.Exception ex)
-                            {
-                                ls.writeError(ex);
-                            }
-                        };
-                        bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                            l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
+                        else
                         {
-                            ;
-                        };
-                        bw.RunWorkerAsync();
+                            l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
                     }
-                    
+                    catch (System.Exception ex)
+                    {
+                        ls.writeError(ex);
+                    }
                 }
             }
 

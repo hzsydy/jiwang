@@ -185,7 +185,60 @@ namespace jiwang.model
             public List<Byte> data = new List<Byte>();
             // buffer
             public byte[] buffer = new byte[common.buffersize];
+  
+        }
 
+        bool parseStateData(StateObject state)
+        {
+            Console.WriteLine("receive:" + common.ascii2Str(state.data));
+            if (state.data.Count >= common.msg_position)
+            {
+                List<byte> msg_len_header = state.data.GetRange(common.msglen_position, common.msglen_length);
+                int msg_len = Convert.ToInt32(common.ascii2Str(msg_len_header));
+
+                int expect_len = common.msg_position + msg_len;
+
+                if (state.data.Count >= expect_len)
+                {
+                    //all data received. parse it
+
+                    List<byte> type_header = state.data.GetRange(0, common.type_header_length);
+                    List<byte> name_header = state.data.GetRange(
+                        common.type_header_length, common.name_header_length);
+                    List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
+
+                    string type_str = common.ascii2Str(type_header);
+                    string chatname = common.ascii2Str(name_header);
+
+                    lock (thisLock)
+                    {
+                        ChatLink cl = register(chatname);
+
+                        cl.onReceive(type_str, msg.ToArray());
+                    }
+
+
+                    List<byte> left_msg = state.data.GetRange(expect_len,
+                        state.data.Count - expect_len);
+                    if (left_msg.Count == 0)
+                        state.data = new List<byte>();
+                    else
+                    {
+                        int notzero = left_msg.FindIndex((x) => x > 0);
+                        if (notzero >= 0)
+                        {
+                            state.data = left_msg.GetRange(notzero, left_msg.Count - notzero);
+                        }
+                        else
+                        {
+                            state.data = new List<byte>();
+                        }
+                    }
+                    state.buffer = new byte[common.buffersize];
+                    return true;
+                }
+            }
+            return false;
         }
 
         void acceptCallback(IAsyncResult ar)
@@ -220,65 +273,16 @@ namespace jiwang.model
             {
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(ar);
+                Console.WriteLine(string.Format("receive {0} bytes", bytesRead));
                 if (bytesRead > 0)
                 {
                     state.data.AddRange(new List<Byte>(state.buffer).GetRange(0, bytesRead));
-                    if (bytesRead >= common.msg_position)
-                    {
-                        Console.WriteLine("receive:" + common.ascii2Str(state.data));
-
-                        int msg_len = Convert.ToInt32(common.ascii2Str(state.data.GetRange(
-                            common.type_header_length + common.name_header_length,
-                            common.msglen_length))
-                            );
-
-                        int expect_len = common.name_header_length + common.type_header_length +
-                            common.msglen_length + msg_len;
-
-                        if (state.data.Count >= expect_len)
-                        {
-                            //all data received. parse it
-
-                            List<byte> type_header = state.data.GetRange(0, common.type_header_length);
-                            List<byte> name_header = state.data.GetRange(
-                                common.type_header_length, common.name_header_length);
-                            List<byte> msg = state.data.GetRange(common.msg_position, msg_len);
-
-                            string type_str = common.ascii2Str(type_header);
-                            string chatname = common.ascii2Str(name_header);
-
-                            lock (thisLock)
-                            {
-                                ChatLink cl = register(chatname);
-
-                                cl.onReceive(type_str, msg.ToArray());
-                            }
-
-
-                            List<byte> left_msg = state.data.GetRange(common.msg_position + msg_len,
-                                state.data.Count - msg_len - common.msg_position);
-
-                            int notzero = left_msg.FindIndex((x) => x > 0);
-                            if (notzero > 0)
-                            {
-                                left_msg = left_msg.GetRange(notzero, left_msg.Count - notzero);
-                            }
-                            else
-                            {
-                                left_msg = new List<byte>();
-                            }
-
-                            state = new StateObject();
-                            state.workSocket = handler;
-                            state.data = left_msg;
-                            state.buffer = new byte[common.buffersize];
-                        }
-                    }
-
-                    // Not all data received. Get more.
-                    handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
-                        new AsyncCallback(readCallback), state);
+                    //parse data
+                    while (parseStateData(state)) ;
                 }
+                // Not all data received. Get more.
+                handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
+                    new AsyncCallback(readCallback), state);
             }
             catch (System.Exception ex)
             {
