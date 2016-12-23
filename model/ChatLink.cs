@@ -267,9 +267,9 @@ namespace jiwang.model
                     }
                 }
             }
-            catch (System.Exception /*ex*/)
+            catch (System.Exception ex)
             {
-                ;
+                ls.writeError(ex);
             }
         }
 
@@ -298,17 +298,23 @@ namespace jiwang.model
                     data.AddRange(msg_len);
                     data.AddRange(msg);
                     state.data = data.ToArray();
-
-                    // Send the data through the socket.
-                    if (state.data.Length - state.sendPos >= common.buffersize)
+                    try
                     {
-                        l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                            new AsyncCallback(SendCallback), state);
+                        // Send the data through the socket.
+                        if (state.data.Length - state.sendPos >= common.buffersize)
+                        {
+                            l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
+                        else
+                        {
+                            l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                                new AsyncCallback(SendCallback), state);
+                        }
                     }
-                    else
+                    catch (System.Exception ex)
                     {
-                        l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                            new AsyncCallback(SendCallback), state);
+                        ls.writeError(ex);
                     }
                 }
             }
