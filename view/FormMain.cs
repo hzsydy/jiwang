@@ -124,6 +124,7 @@ namespace jiwang
                     ChatLink cl = ls.register(chatname);
                     cl.AddUser(sl.getUserName());
                     cl.AddUser(newuser);
+                    cl.Nickname = newuser;
                     cl.start();
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>

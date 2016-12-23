@@ -26,6 +26,10 @@ namespace jiwang.model
             {
                 return nickname;
             }
+            set
+            {
+                nickname = value;
+            }
         }
 
         struct link
@@ -214,17 +218,16 @@ namespace jiwang.model
                     if (!exist)
                     {
                         AddUser(username);
-                        try
-                        {
-                            start();
-                        }
-                        catch (System.Exception ex)
-                        {
-                            ls.writeError(ex);
-                        }
                     }
                 }
-                
+                try
+                {
+                    start();
+                }
+                catch (System.Exception ex)
+                {
+                    ls.writeError(ex);
+                }
             }
         }
 
