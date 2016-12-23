@@ -16,7 +16,8 @@ namespace jiwang
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMain());
+            FormMain thisFormMain = new FormMain();
+            Application.Run(thisFormMain);
         }
     }
 }

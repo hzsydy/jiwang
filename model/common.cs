@@ -30,6 +30,8 @@ namespace jiwang.model
         public const string type_str_invite_group = "ivgp";
         public const string type_str_quit_group = "qtgp";
 
+        public const string default_nickname = "huaji";
+
         static readonly char[] AvailableCharacters = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 

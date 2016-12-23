@@ -51,7 +51,7 @@ namespace jiwang.model
             this.sl = sl;
             this.ls = ls;
             this.chatname = chatname;
-            this.nickname = "untitled";
+            this.nickname = common.default_nickname;
             links = new List<link>();
         }
 
@@ -138,6 +138,7 @@ namespace jiwang.model
                 {
                     ;
                 }
+                Console.WriteLine("successfully connect " + l.sendSocket.RemoteEndPoint);
             }
             if (!l.linked) throw new Exception("无法连接"+l.dst_username+"的IP地址。");
         }
@@ -185,13 +186,12 @@ namespace jiwang.model
                 List<byte> lb_msg = new List<byte>(msg);
                 int len = common.name_header_length;
                 int usernum = msg.Length / len;
-                if (usernum == 2)
+                if (usernum == 2 && nickname == common.default_nickname)
                 {
-                    //这是个两人群
-                    //也就是单独聊天
+                    //还没有给群聊名称赋值，需要硬点一个
+                    //这是个两人群，也就是单独聊天
                     string username1 = common.ascii2Str(lb_msg.GetRange(0, len));
                     string username2 = common.ascii2Str(lb_msg.GetRange(len, len));
-                    
                     if (username1 != sl.getUserName())
                     {
                         nickname = username1;
