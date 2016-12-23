@@ -117,21 +117,17 @@ namespace jiwang
         {
             string newuser = Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493");
             string chatname = common.generateIdentifier(common.name_header_length);
-            using (BackgroundWorker bw = new BackgroundWorker())
+            try
             {
-                bw.DoWork += (object o, DoWorkEventArgs ea) =>
-                {
-                    ChatLink cl = ls.register(chatname);
-                    cl.AddUser(sl.getUserName());
-                    cl.AddUser(newuser);
-                    cl.Nickname = newuser;
-                    cl.start();
-                };
-                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
-                {
-                    writeError(ea.Error);
-                };
-                bw.RunWorkerAsync();
+                ChatLink cl = ls.register(chatname);
+                cl.AddUser(sl.getUserName());
+                cl.AddUser(newuser);
+                cl.Nickname = newuser;
+                cl.start();
+            }
+            catch (System.Exception ex)
+            {
+                writeError(ex);
             }
         }
 

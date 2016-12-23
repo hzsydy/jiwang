@@ -10,14 +10,14 @@ using System.ComponentModel;
 
 namespace jiwang.model
 {
-
-
     public class ChatLink
     {
         ServerLink sl;
         Listener ls;
 
         string chatname;
+
+        private Object thisLock = new Object();  
 
         public string getChatname()
         {
@@ -57,50 +57,62 @@ namespace jiwang.model
 
         public void AddUser(string dst_username)
         {
-            Socket sendSocket;
-            sendSocket = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
+            lock (thisLock)
+            {
+                Socket sendSocket;
+                sendSocket = new Socket(AddressFamily.InterNetwork,
+                    SocketType.Stream, ProtocolType.Tcp);
 
-            sendSocket.ReceiveBufferSize = 8192;
-            sendSocket.ReceiveTimeout = 1000;
-            sendSocket.SendBufferSize = 8192;
-            sendSocket.SendTimeout = 1000;
-            link l;
-            l.dst_username = dst_username;
-            l.sendSocket = sendSocket;
-            links.Add(l);
+                sendSocket.ReceiveBufferSize = 8192;
+                sendSocket.ReceiveTimeout = 1000;
+                sendSocket.SendBufferSize = 8192;
+                sendSocket.SendTimeout = 1000;
+                link l;
+                l.dst_username = dst_username;
+                l.sendSocket = sendSocket;
+                links.Add(l);
+            }
         }
 
         public void start()
         {
-            foreach (link l in links) 
-            {
-                try
-                {
-                    checkDstOnline(l);
-                }
-                catch (System.Exception ex)
-                {
-                    ls.writeError(ex);
-                }
-            }
-            //Broadcast it
+            //data to Broadcast
             List<Byte> data = new List<Byte>();
-            foreach (link l in links)
+            lock (thisLock)
             {
-                byte[] name_header = common.str2ascii(
-                    l.dst_username, common.name_header_length);
-                data.AddRange(name_header);
+                foreach (link l in links)
+                {
+                    try
+                    {
+                        checkDstOnline(l);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        ls.writeError(ex);
+                    }
+                }
+                foreach (link l in links)
+                {
+                    byte[] name_header = common.str2ascii(
+                        l.dst_username, common.name_header_length);
+                    data.AddRange(name_header);
+                }
             }
             sendMsg(common.type_str_invite_group, data.ToArray());
         }
 
         public void stop()
         {
-            foreach (link l in links)
+            lock (thisLock)
             {
-                l.sendSocket.Shutdown(SocketShutdown.Both);
-                l.sendSocket.Close();
+                foreach (link l in links)
+                {
+                    if (l.linked)
+                    {
+                        l.sendSocket.Shutdown(SocketShutdown.Both);
+                        l.sendSocket.Close();
+                    }
+                }
             }
         }
 
@@ -261,7 +273,7 @@ namespace jiwang.model
             }
         }
 
-        public virtual void sendMsg(string type_str, byte[] msg)
+        public void sendMsg(string type_str, byte[] msg)
         {
 
             Console.WriteLine("send " + type_str);
@@ -274,29 +286,33 @@ namespace jiwang.model
             byte[] name_header = common.str2ascii(
                 chatname, common.name_header_length);
 
-            foreach (link l in links)
+            lock (thisLock)
             {
-                StateObject state = new StateObject();
-                state.workSocket = l.sendSocket;
-                List<Byte> data = new List<Byte>();
-                data.AddRange(type_header);
-                data.AddRange(name_header);
-                data.AddRange(msg_len);
-                data.AddRange(msg);
-                state.data = data.ToArray();
+                foreach (link l in links)
+                {
+                    StateObject state = new StateObject();
+                    state.workSocket = l.sendSocket;
+                    List<Byte> data = new List<Byte>();
+                    data.AddRange(type_header);
+                    data.AddRange(name_header);
+                    data.AddRange(msg_len);
+                    data.AddRange(msg);
+                    state.data = data.ToArray();
 
-                // Send the data through the socket.
-                if (state.data.Length - state.sendPos >= common.buffersize)
-                {
-                    l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                        new AsyncCallback(SendCallback), state);
-                }
-                else
-                {
-                    l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                        new AsyncCallback(SendCallback), state);
+                    // Send the data through the socket.
+                    if (state.data.Length - state.sendPos >= common.buffersize)
+                    {
+                        l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                            new AsyncCallback(SendCallback), state);
+                    }
+                    else
+                    {
+                        l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                            new AsyncCallback(SendCallback), state);
+                    }
                 }
             }
+
         }
 
         public void sendMsg(string type_str, string message)
