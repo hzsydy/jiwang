@@ -139,7 +139,7 @@ namespace jiwang
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
-                ls.unregister((string)listBoxFriend.Items[listBoxFriend.SelectedIndex]);
+                ls.unregister(((ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex]).getChatname());
             }
         }
 

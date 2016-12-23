@@ -19,6 +19,11 @@ namespace jiwang.model
 
         string chatname;
 
+        public string getChatname()
+        {
+            return chatname;
+        }
+
         string nickname;
         public string Nickname
         {
@@ -78,26 +83,6 @@ namespace jiwang.model
                 {
                     ls.writeError(ex);
                 }
-                //using (BackgroundWorker bw = new BackgroundWorker())
-                //{
-                //    bw.DoWork += (object o, DoWorkEventArgs ea) =>
-                //    {
-                //        if (l.linked)
-                //        {
-                //            ping();
-                //            Thread.Sleep(common.ping_interval);
-                //        }
-                //    };
-                //    bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
-                //    {
-                //        if (ea.Error != null)
-                //        {
-                //            ls.writeMsg(ea.Error.Message);
-                //            ls.unregister(dst_username);
-                //        }
-                //    };
-                //    bw.RunWorkerAsync();
-                //}
             }
             //Broadcast it
             List<Byte> data = new List<Byte>();
@@ -220,13 +205,16 @@ namespace jiwang.model
                         AddUser(username);
                     }
                 }
-                try
+                foreach (link l in links)
                 {
-                    start();
-                }
-                catch (System.Exception ex)
-                {
-                    ls.writeError(ex);
+                    try
+                    {
+                        checkDstOnline(l);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        ls.writeError(ex);
+                    }
                 }
             }
         }
