@@ -193,6 +193,7 @@ namespace jiwang
                             );
 
                         cl.sendMsg(common.type_str_text, text);
+                        cl.sendMsg(common.type_str_fileowner, sl.getUserName());
                         cl.sendMsg(common.type_str_filename, filename);
                         cl.sendMsg(common.type_str_file, bytes);
                     }

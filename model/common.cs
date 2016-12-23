@@ -9,29 +9,45 @@ namespace jiwang.model
 {
     class common
     {
+        //连接端口号
         public const int p2p_port = 23333;
+        
+        //报文结构
+        //前4字节是报文特征码，中间16字节是随机生成的聊天标识符，然后10字节是报文内容长度
+        //30字节之后为报文内容
         public const int name_header_length = 16;
         public const int type_header_length = 4;
         public const int msglen_length = 10;
         public const int msglen_position = 20;
         public const int msg_position = 30;
+
+        //单次缓冲区大小
         public const int buffersize = 1024;
 
+        //ping的间隔时间和最大延时
         public const int ping_interval = 5000;
         public const int ping_timeout = 2000;
 
-
+        //报文特征码
+        
+        //发送文字
         public const string type_str_text = "text";
-        public const string type_str_filename = "flnm";
-        public const string type_str_file = "file";
+        //ping&echo
         public const string type_str_ping = "ping";
         public const string type_str_echo = "echo";
-
+        //file相关
+        public const string type_str_file = "file";
+        public const string type_str_filename = "flnm";
+        public const string type_str_fileowner = "flow";
+        //group相关。注意，点对点事实上是两人群。
         public const string type_str_invite_group = "ivgp";
         public const string type_str_quit_group = "qtgp";
 
+
         public const string default_nickname = "huaji";
 
+
+        //生成随机字符串
         static readonly char[] AvailableCharacters = {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
@@ -50,15 +66,18 @@ namespace jiwang.model
                 rng.GetBytes(randomData);
             }
 
-            for (int idx = 0; idx < identifier.Length; idx++)
+            for (int idx = 0; idx < identifier.Length-1; idx++)
             {
                 int pos = randomData[idx] % AvailableCharacters.Length;
                 identifier[idx] = AvailableCharacters[pos];
             }
+            //为了方便人类观赏报文制作的dirty fuck
+            identifier[length - 1] = '_';
 
             return new string(identifier);
         }
 
+        //一些愚蠢的转换函数
 
         public static string unicode2Str(byte[] buffer)
         {

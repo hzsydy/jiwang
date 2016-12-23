@@ -156,10 +156,11 @@ namespace jiwang.model
 
         //bool echoreceived = false;
         string nextFileName = string.Empty;
+        string nextFileOwner = string.Empty;
 
-        public virtual void onReceive(string type_str, byte[] msg)
+        public void onReceive(string type_str, byte[] msg)
         {
-            Console.WriteLine("receive " + type_str);
+            //Console.WriteLine("receive " + type_str);
             if (type_str == common.type_str_text)
             {
                 string str_msg = common.unicode2Str(msg);
@@ -167,7 +168,11 @@ namespace jiwang.model
             }
             else if (type_str == common.type_str_file)
             {
-                ls.writeFile(nextFileName, msg);
+                if (nextFileOwner != sl.getUserName())
+                {
+                    //防止在群聊中重复发给自己
+                    ls.writeFile(nextFileName, msg);
+                }
             } 
             else if (type_str == common.type_str_ping)
             {
@@ -180,6 +185,10 @@ namespace jiwang.model
             else if (type_str == common.type_str_filename)
             {
                 nextFileName = common.unicode2Str(msg);
+            }
+            else if (type_str == common.type_str_fileowner)
+            {
+                nextFileOwner = common.unicode2Str(msg);
             }
             else if (type_str == common.type_str_invite_group)
             {
@@ -275,8 +284,7 @@ namespace jiwang.model
 
         public void sendMsg(string type_str, byte[] msg)
         {
-
-            Console.WriteLine("send " + type_str);
+            //Console.WriteLine("send " + type_str);
 
             byte[] msg_len = common.str2ascii(
                 msg.Length.ToString(), common.msglen_length);
@@ -322,6 +330,7 @@ namespace jiwang.model
 
         }
 
+        //发string默认用unicode发
         public void sendMsg(string type_str, string message)
         {
             byte[] msg = Encoding.Unicode.GetBytes(message);
