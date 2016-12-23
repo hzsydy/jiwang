@@ -177,7 +177,7 @@ namespace jiwang.model
         }
 
 
-        public class StateObject
+        class StateObject
         {
             // Client  socket.
             public Socket workSocket = null;
@@ -253,8 +253,24 @@ namespace jiwang.model
 
                                 cl.onReceive(type_str, msg.ToArray());
                             }
+
+
+                            List<byte> left_msg = state.data.GetRange(common.msg_position + msg_len,
+                                state.data.Count - msg_len - common.msg_position);
+
+                            int notzero = left_msg.FindIndex((x) => x > 0);
+                            if (notzero > 0)
+                            {
+                                left_msg = left_msg.GetRange(notzero, left_msg.Count - notzero);
+                            }
+                            else
+                            {
+                                left_msg = new List<byte>();
+                            }
+
                             state = new StateObject();
                             state.workSocket = handler;
+                            state.data = left_msg;
                             state.buffer = new byte[common.buffersize];
                         }
                     }

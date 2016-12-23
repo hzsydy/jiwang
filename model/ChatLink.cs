@@ -240,7 +240,7 @@ namespace jiwang.model
             }
         }
 
-        public class StateObject
+        class StateObject
         {
             public Socket workSocket = null;
             public byte[] data;
