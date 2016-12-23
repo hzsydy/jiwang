@@ -22,6 +22,8 @@ namespace jiwang.model
         bool isRunning() { return working; }
         ManualResetEvent allDone;
 
+        private Object thisLock = new Object();  
+
         byte[] buffer = new byte[common.buffersize];
 
         public Listener(ServerLink sl)
@@ -40,43 +42,52 @@ namespace jiwang.model
 
         public ChatLink register(string chatname)
         {
-            if (!reg_chatlinks.ContainsKey(chatname))
+            lock (thisLock)
             {
-                ChatLink new_cl = new ChatLink(sl, this, chatname);
-                reg_chatlinks.Add(chatname, new_cl);
-                if (form != null)
+                if (!reg_chatlinks.ContainsKey(chatname))
                 {
-                    form.BeginInvoke((Action)delegate{ form.refreshFriendList(reg_chatlinks); });
+                    ChatLink new_cl = new ChatLink(sl, this, chatname);
+                    reg_chatlinks.Add(chatname, new_cl);
+                    if (form != null)
+                    {
+                        form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                    }
                 }
+                ChatLink cl = reg_chatlinks[chatname];
+                return cl;
             }
-            ChatLink cl = reg_chatlinks[chatname];
-            return cl;
         }
 
         public void unregister(string chatname)
         {
-            if (reg_chatlinks.ContainsKey(chatname))
+            lock (thisLock)
             {
-                ChatLink cl = reg_chatlinks[chatname];
-                cl.stop();
-                reg_chatlinks.Remove(chatname);
-                if (form != null)
+                if (reg_chatlinks.ContainsKey(chatname))
                 {
-                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                    ChatLink cl = reg_chatlinks[chatname];
+                    cl.stop();
+                    reg_chatlinks.Remove(chatname);
+                    if (form != null)
+                    {
+                        form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                    }
                 }
             }
         }
 
         public void changeName(string oldname, string newname)
         {
-            if (reg_chatlinks.ContainsKey(oldname))
+            lock (thisLock)
             {
-                ChatLink cl = reg_chatlinks[oldname];
-                reg_chatlinks.Remove(oldname);
-                reg_chatlinks.Add(newname, cl);
-                if (form != null)
+                if (reg_chatlinks.ContainsKey(oldname))
                 {
-                    form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                    ChatLink cl = reg_chatlinks[oldname];
+                    reg_chatlinks.Remove(oldname);
+                    reg_chatlinks.Add(newname, cl);
+                    if (form != null)
+                    {
+                        form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
+                    }
                 }
             }
         }
@@ -155,12 +166,12 @@ namespace jiwang.model
 
         public void stop()
         {
-            working = false; 
+            working = false;
             listenSocket.Close();
-            string[] users = reg_chatlinks.Keys.ToArray();
-            foreach (string u in users)
+            string[] chats = reg_chatlinks.Keys.ToArray();
+            foreach (string c in chats)
             {
-                unregister(u);
+                unregister(c);
             }
         }
 
@@ -228,10 +239,13 @@ namespace jiwang.model
 
                         string type_str = common.ascii2Str(type_header);
                         string chatname = common.ascii2Str(name_header);
-                        
-                        ChatLink cl = register(chatname);
 
-                        cl.onReceive(type_str, msg.ToArray());
+                        lock (thisLock)
+                        {
+                            ChatLink cl = register(chatname);
+
+                            cl.onReceive(type_str, msg.ToArray());
+                        }
                         state = new StateObject();
                         state.workSocket = handler;
                     }
