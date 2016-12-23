@@ -41,6 +41,7 @@ namespace jiwang.model
         {
             public string dst_username;
             public Socket sendSocket;
+            public ManualResetEvent canSend;
             public bool linked { get { return sendSocket.Connected; } }
         }
 
@@ -68,6 +69,8 @@ namespace jiwang.model
                 sendSocket.SendBufferSize = 8192;
                 sendSocket.SendTimeout = 1000;
                 link l;
+                l.canSend = new ManualResetEvent(false);
+                l.canSend.Set();
                 l.dst_username = dst_username;
                 l.sendSocket = sendSocket;
                 links.Add(l);
@@ -245,6 +248,7 @@ namespace jiwang.model
             public Socket workSocket = null;
             public byte[] data;
             public int sendPos = 0;
+            public link l;
         }
 
         void SendCallback(IAsyncResult ar)
@@ -272,7 +276,7 @@ namespace jiwang.model
                     }
                     else
                     {
-                        ;
+                        state.l.canSend.Set();
                     }
                 }
             }
@@ -304,28 +308,42 @@ namespace jiwang.model
                 Console.WriteLine("send:" + common.ascii2Str(data));
                 foreach (link l in links)
                 {
-                    StateObject state = new StateObject();
-                    state.workSocket = l.sendSocket;
-                    state.data = data.ToArray();
-                    try
+                    using (BackgroundWorker bw = new BackgroundWorker())
                     {
-                        // Send the data through the socket.
-                        if (state.data.Length - state.sendPos >= common.buffersize)
+                        bw.DoWork += (object o, DoWorkEventArgs ea) =>
                         {
+                            l.canSend.WaitOne();
+                            StateObject state = new StateObject();
+                            state.workSocket = l.sendSocket;
+                            state.data = data.ToArray();
+                            state.l = l;
+                            try
+                            {
+                                // Send the data through the socket.
+                                if (state.data.Length - state.sendPos >= common.buffersize)
+                                {
 
-                            l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
-                                new AsyncCallback(SendCallback), state);
-                        }
-                        else
+                                    l.sendSocket.BeginSend(state.data, state.sendPos, common.buffersize, 0,
+                                        new AsyncCallback(SendCallback), state);
+                                }
+                                else
+                                {
+                                    l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
+                                        new AsyncCallback(SendCallback), state);
+                                }
+                            }
+                            catch (System.Exception ex)
+                            {
+                                ls.writeError(ex);
+                            }
+                        };
+                        bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                         {
-                            l.sendSocket.BeginSend(state.data, state.sendPos, state.data.Length - state.sendPos, 0,
-                                new AsyncCallback(SendCallback), state);
-                        }
+                            ;
+                        };
+                        bw.RunWorkerAsync();
                     }
-                    catch (System.Exception ex)
-                    {
-                        ls.writeError(ex);
-                    }
+                    
                 }
             }
 
