@@ -288,15 +288,18 @@ namespace jiwang.model
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(ar);
                 Console.WriteLine(string.Format("receive {0} bytes", bytesRead));
+                //  Socket.EndReceive() returns 0 in one specific case: 
+                //the remote host has begun or acknowledged the graceful closure sequence 
+                //(e.g. for a .NET Socket-based program, calling Socket.Shutdown() 
+                //with either SocketShutdown.Send or SocketShutdown.Both).
                 if (bytesRead > 0)
                 {
                     state.data.AddRange(new List<Byte>(state.buffer).GetRange(0, bytesRead));
                     //parse data
                     while (parseStateData(state)) ;
+                    handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
+                        new AsyncCallback(readCallback), state);
                 }
-                // Not all data received. Get more.
-                handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
-                    new AsyncCallback(readCallback), state);
             }
             catch (System.Exception ex)
             {
