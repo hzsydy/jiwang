@@ -31,7 +31,7 @@ namespace jiwang.view
             //listBoxFriend.DisplayMember = "Nickname";
             listBoxFriend.DrawMode = DrawMode.OwnerDrawFixed;
 
-            msgHistory = new Dictionary<string, StringBuilder>();
+            msgHistorys = new Dictionary<string, MsgHistory>();
         }
 
         private void FormMain_Load(object sender, EventArgs e)
@@ -291,7 +291,7 @@ namespace jiwang.view
             }
         }
 
-        struct MsgHistory
+        class MsgHistory
         {
             public StringBuilder sb;
             public int unread;
@@ -301,7 +301,7 @@ namespace jiwang.view
         {
             if (!msgHistorys.ContainsKey(chatname))
             {
-                MsgHistory m;
+                MsgHistory m = new MsgHistory();
                 m.sb = new StringBuilder();
                 m.unread = 0;
                 msgHistorys.Add(chatname, m);
@@ -381,12 +381,12 @@ namespace jiwang.view
             var m = getMsgHistory(chatname);
             if (m.unread > 0)
             {
-                string showText = string.Format("({0}){1}", m.unread, cl.Nickname);
-                e.Graphics.DrawString(showText, new Font("Arial", 10, FontStyle.Bold), Brushes.Black, e.Bounds);
+                string showText = string.Format("【{0}未读】{1}", m.unread, cl.Nickname);
+                e.Graphics.DrawString(showText, new Font("Arial", 8, FontStyle.Bold), Brushes.Black, e.Bounds);
             }
             else
             {
-                e.Graphics.DrawString(cl.Nickname, new Font("Arial", 10, FontStyle.Regular), Brushes.Black, e.Bounds);
+                e.Graphics.DrawString(cl.Nickname, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, e.Bounds);
             }
             e.DrawFocusRectangle();
         }
