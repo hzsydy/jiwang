@@ -59,6 +59,7 @@
             this.buttonDelFriend.TabIndex = 2;
             this.buttonDelFriend.Text = "删除好友";
             this.buttonDelFriend.UseVisualStyleBackColor = true;
+            this.buttonDelFriend.Click += new System.EventHandler(this.buttonDelFriend_Click);
             // 
             // buttonAddFriend
             // 
@@ -68,6 +69,7 @@
             this.buttonAddFriend.TabIndex = 1;
             this.buttonAddFriend.Text = "添加好友";
             this.buttonAddFriend.UseVisualStyleBackColor = true;
+            this.buttonAddFriend.Click += new System.EventHandler(this.buttonAddFriend_Click);
             // 
             // listBoxFriend
             // 
@@ -93,6 +95,7 @@
             this.textBoxGroupName.Name = "textBoxGroupName";
             this.textBoxGroupName.Size = new System.Drawing.Size(108, 21);
             this.textBoxGroupName.TabIndex = 4;
+            this.textBoxGroupName.Text = "计网大作业讨论组";
             // 
             // buttonOK
             // 
@@ -102,15 +105,18 @@
             this.buttonOK.TabIndex = 5;
             this.buttonOK.Text = "确认";
             this.buttonOK.UseVisualStyleBackColor = true;
+            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
             // buttonCancel
             // 
+            this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.buttonCancel.Location = new System.Drawing.Point(18, 373);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(132, 24);
             this.buttonCancel.TabIndex = 6;
             this.buttonCancel.Text = "取消";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // FormAddGroup
             // 

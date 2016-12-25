@@ -56,7 +56,7 @@ namespace jiwang.model
             links = new List<link>();
         }
 
-        public void AddUser(string dst_username)
+        public void addUser(string dst_username)
         {
             lock (thisLock)
             {
@@ -74,6 +74,14 @@ namespace jiwang.model
                 l.dst_username = dst_username;
                 l.sendSocket = sendSocket;
                 links.Add(l);
+            }
+        }
+
+        public void delUser(string dst_username)
+        {
+            lock (thisLock)
+            {
+                ;
             }
         }
 
@@ -226,7 +234,7 @@ namespace jiwang.model
                     }
                     if (!exist)
                     {
-                        AddUser(username);
+                        addUser(username);
                     }
                 }
                 foreach (link l in links)

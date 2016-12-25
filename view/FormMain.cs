@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using jiwang.model;
-using Microsoft.VisualBasic;
 using System.IO;
+using jiwang.view;
 
 namespace jiwang
 {
@@ -115,14 +115,35 @@ namespace jiwang
 
         private void buttonAddFriend_Click(object sender, EventArgs e)
         {
-            string newuser = Interaction.InputBox("请输入好友用户名", "计网大作业", "2014011493");
+            if (sl.linked)
+            {
+                FormAddFriend f = new FormAddFriend(this);
+                f.Show();
+            }
+        }
+
+
+        private void buttonAddGroup_Click(object sender, EventArgs e)
+        {
+            if (sl.linked)
+            {
+                FormAddGroup f = new FormAddGroup(this);
+                f.Show();
+            }
+        }
+
+        public void addFriend(string nickname, List<string> users)
+        {
             string chatname = common.generateIdentifier(common.name_header_length);
             try
             {
                 ChatLink cl = ls.register(chatname);
-                cl.AddUser(sl.getUserName());
-                cl.AddUser(newuser);
-                cl.Nickname = newuser;
+                cl.addUser(sl.getUserName());
+                foreach (string user in users)
+                {
+                    cl.addUser(user);
+                }
+                cl.Nickname = nickname;
                 cl.start();
             }
             catch (System.Exception ex)
@@ -235,5 +256,6 @@ namespace jiwang
                 writeError(ex);
             }
         }
+
     }
 }

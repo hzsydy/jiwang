@@ -68,10 +68,7 @@ namespace jiwang.model
                     ChatLink cl = reg_chatlinks[chatname];
                     cl.stop();
                     reg_chatlinks.Remove(chatname);
-                    if (form != null)
-                    {
-                        form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
-                    }
+                    refreshFriendList();
                 }
             }
         }
@@ -85,11 +82,17 @@ namespace jiwang.model
                     ChatLink cl = reg_chatlinks[oldname];
                     reg_chatlinks.Remove(oldname);
                     reg_chatlinks.Add(newname, cl);
-                    if (form != null)
-                    {
-                        form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
-                    }
+                    refreshFriendList();
                 }
+            }
+        }
+
+
+        public void refreshFriendList()
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.refreshFriendList(reg_chatlinks); });
             }
         }
 

@@ -40,10 +40,11 @@
             this.buttonAddFriend = new System.Windows.Forms.Button();
             this.listBoxFriend = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.buttonSendFile = new System.Windows.Forms.Button();
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBoxMsgSend = new System.Windows.Forms.TextBox();
             this.textBoxMsgReceive = new System.Windows.Forms.TextBox();
-            this.buttonSendFile = new System.Windows.Forms.Button();
+            this.buttonAddGroup = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -121,6 +122,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.buttonAddGroup);
             this.groupBox2.Controls.Add(this.buttonDelFriend);
             this.groupBox2.Controls.Add(this.buttonAddFriend);
             this.groupBox2.Controls.Add(this.listBoxFriend);
@@ -133,17 +135,17 @@
             // 
             // buttonDelFriend
             // 
-            this.buttonDelFriend.Location = new System.Drawing.Point(6, 357);
+            this.buttonDelFriend.Location = new System.Drawing.Point(6, 351);
             this.buttonDelFriend.Name = "buttonDelFriend";
             this.buttonDelFriend.Size = new System.Drawing.Size(132, 24);
             this.buttonDelFriend.TabIndex = 2;
-            this.buttonDelFriend.Text = "删除好友";
+            this.buttonDelFriend.Text = "删除好友/群聊";
             this.buttonDelFriend.UseVisualStyleBackColor = true;
             this.buttonDelFriend.Click += new System.EventHandler(this.buttonDelFriend_Click);
             // 
             // buttonAddFriend
             // 
-            this.buttonAddFriend.Location = new System.Drawing.Point(6, 327);
+            this.buttonAddFriend.Location = new System.Drawing.Point(6, 291);
             this.buttonAddFriend.Name = "buttonAddFriend";
             this.buttonAddFriend.Size = new System.Drawing.Size(132, 24);
             this.buttonAddFriend.TabIndex = 1;
@@ -157,7 +159,7 @@
             this.listBoxFriend.ItemHeight = 12;
             this.listBoxFriend.Location = new System.Drawing.Point(8, 17);
             this.listBoxFriend.Name = "listBoxFriend";
-            this.listBoxFriend.Size = new System.Drawing.Size(130, 304);
+            this.listBoxFriend.Size = new System.Drawing.Size(130, 268);
             this.listBoxFriend.TabIndex = 0;
             // 
             // groupBox3
@@ -172,6 +174,16 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "聊天窗口";
+            // 
+            // buttonSendFile
+            // 
+            this.buttonSendFile.Location = new System.Drawing.Point(9, 353);
+            this.buttonSendFile.Name = "buttonSendFile";
+            this.buttonSendFile.Size = new System.Drawing.Size(72, 21);
+            this.buttonSendFile.TabIndex = 3;
+            this.buttonSendFile.Text = "发送文件";
+            this.buttonSendFile.UseVisualStyleBackColor = true;
+            this.buttonSendFile.Click += new System.EventHandler(this.buttonSendFile_Click);
             // 
             // buttonSend
             // 
@@ -200,15 +212,15 @@
             this.textBoxMsgReceive.Size = new System.Drawing.Size(514, 330);
             this.textBoxMsgReceive.TabIndex = 0;
             // 
-            // buttonSendFile
+            // buttonAddGroup
             // 
-            this.buttonSendFile.Location = new System.Drawing.Point(9, 353);
-            this.buttonSendFile.Name = "buttonSendFile";
-            this.buttonSendFile.Size = new System.Drawing.Size(72, 21);
-            this.buttonSendFile.TabIndex = 3;
-            this.buttonSendFile.Text = "发送文件";
-            this.buttonSendFile.UseVisualStyleBackColor = true;
-            this.buttonSendFile.Click += new System.EventHandler(this.buttonSendFile_Click);
+            this.buttonAddGroup.Location = new System.Drawing.Point(6, 321);
+            this.buttonAddGroup.Name = "buttonAddGroup";
+            this.buttonAddGroup.Size = new System.Drawing.Size(132, 24);
+            this.buttonAddGroup.TabIndex = 3;
+            this.buttonAddGroup.Text = "新建群聊";
+            this.buttonAddGroup.UseVisualStyleBackColor = true;
+            this.buttonAddGroup.Click += new System.EventHandler(this.buttonAddGroup_Click);
             // 
             // FormMain
             // 
@@ -248,6 +260,7 @@
         private System.Windows.Forms.TextBox textBoxMsgSend;
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.Button buttonSendFile;
+        private System.Windows.Forms.Button buttonAddGroup;
     }
 }
 
