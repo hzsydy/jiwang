@@ -132,8 +132,15 @@ namespace jiwang.view
                 {
                     cl.addUser(user);
                 }
-                cl.Nickname = nickname;
                 cl.start();
+                if (users.Count == 1)
+                {
+                    cl.Nickname = nickname;
+                }
+                else
+                {
+                    cl.sendMsg(common.type_str_set_groupname, nickname);
+                }
             }
             catch (System.Exception ex)
             {

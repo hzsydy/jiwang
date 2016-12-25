@@ -41,6 +41,7 @@ namespace jiwang.model
         public const string type_str_fileowner = "flow";
         //group相关。注意，点对点事实上是两人群。
         public const string type_str_invite_group = "ivgp";
+        public const string type_str_set_groupname = "stgn";
         public const string type_str_quit_group = "qtgp";
 
 

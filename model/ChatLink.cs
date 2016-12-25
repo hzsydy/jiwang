@@ -270,6 +270,11 @@ namespace jiwang.model
                     ls.unregister(chatname);
                 }
             }
+            else if (type_str == common.type_str_set_groupname)
+            {
+                nickname = common.unicode2Str(msg);
+                ls.refreshFriendList();
+            }
         }
 
         class StateObject
