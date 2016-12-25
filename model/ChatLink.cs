@@ -228,6 +228,7 @@ namespace jiwang.model
                     {
                         nickname = username2;
                     }
+                    ls.refreshFriendList();
                 }
                 lock (thisLock)
                 {
