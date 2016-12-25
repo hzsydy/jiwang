@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.ComponentModel;
+using jiwang.view;
 
 namespace jiwang.model
 {
@@ -215,9 +216,19 @@ namespace jiwang.model
 
                     lock (thisLock)
                     {
-                        ChatLink cl = register(chatname);
-
-                        cl.onReceive(type_str, msg.ToArray());
+                        if (type_str != common.type_str_quit_group)
+                        {
+                            ChatLink cl = register(chatname);
+                            cl.onReceive(type_str, msg.ToArray());
+                        }
+                        else
+                        {
+                            if (reg_chatlinks.ContainsKey(chatname))
+                            {
+                                ChatLink cl = register(chatname);
+                                cl.onReceive(type_str, msg.ToArray());
+                            }
+                        }
                     }
 
 

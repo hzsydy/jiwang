@@ -1,4 +1,4 @@
-﻿namespace jiwang
+﻿namespace jiwang.view
 {
     partial class FormMain
     {
@@ -36,6 +36,7 @@
             this.textBoxUsername = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.buttonAddGroup = new System.Windows.Forms.Button();
             this.buttonDelFriend = new System.Windows.Forms.Button();
             this.buttonAddFriend = new System.Windows.Forms.Button();
             this.listBoxFriend = new System.Windows.Forms.ListBox();
@@ -44,7 +45,6 @@
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBoxMsgSend = new System.Windows.Forms.TextBox();
             this.textBoxMsgReceive = new System.Windows.Forms.TextBox();
-            this.buttonAddGroup = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -52,6 +52,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.BackColor = System.Drawing.Color.Transparent;
             this.groupBox1.Controls.Add(this.buttonLogOut);
             this.groupBox1.Controls.Add(this.buttonLogIn);
             this.groupBox1.Controls.Add(this.textBoxPassword);
@@ -67,6 +68,7 @@
             // 
             // buttonLogOut
             // 
+            this.buttonLogOut.ForeColor = System.Drawing.Color.Black;
             this.buttonLogOut.Location = new System.Drawing.Point(83, 70);
             this.buttonLogOut.Name = "buttonLogOut";
             this.buttonLogOut.Size = new System.Drawing.Size(55, 24);
@@ -77,6 +79,7 @@
             // 
             // buttonLogIn
             // 
+            this.buttonLogIn.ForeColor = System.Drawing.Color.Black;
             this.buttonLogIn.Location = new System.Drawing.Point(8, 70);
             this.buttonLogIn.Name = "buttonLogIn";
             this.buttonLogIn.Size = new System.Drawing.Size(55, 24);
@@ -122,6 +125,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.BackColor = System.Drawing.Color.Transparent;
             this.groupBox2.Controls.Add(this.buttonAddGroup);
             this.groupBox2.Controls.Add(this.buttonDelFriend);
             this.groupBox2.Controls.Add(this.buttonAddFriend);
@@ -133,8 +137,20 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "好友列表";
             // 
+            // buttonAddGroup
+            // 
+            this.buttonAddGroup.ForeColor = System.Drawing.Color.Black;
+            this.buttonAddGroup.Location = new System.Drawing.Point(6, 321);
+            this.buttonAddGroup.Name = "buttonAddGroup";
+            this.buttonAddGroup.Size = new System.Drawing.Size(132, 24);
+            this.buttonAddGroup.TabIndex = 3;
+            this.buttonAddGroup.Text = "新建群聊";
+            this.buttonAddGroup.UseVisualStyleBackColor = true;
+            this.buttonAddGroup.Click += new System.EventHandler(this.buttonAddGroup_Click);
+            // 
             // buttonDelFriend
             // 
+            this.buttonDelFriend.ForeColor = System.Drawing.Color.Black;
             this.buttonDelFriend.Location = new System.Drawing.Point(6, 351);
             this.buttonDelFriend.Name = "buttonDelFriend";
             this.buttonDelFriend.Size = new System.Drawing.Size(132, 24);
@@ -145,6 +161,7 @@
             // 
             // buttonAddFriend
             // 
+            this.buttonAddFriend.ForeColor = System.Drawing.Color.Black;
             this.buttonAddFriend.Location = new System.Drawing.Point(6, 291);
             this.buttonAddFriend.Name = "buttonAddFriend";
             this.buttonAddFriend.Size = new System.Drawing.Size(132, 24);
@@ -164,6 +181,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.BackColor = System.Drawing.Color.Transparent;
             this.groupBox3.Controls.Add(this.buttonSendFile);
             this.groupBox3.Controls.Add(this.buttonSend);
             this.groupBox3.Controls.Add(this.textBoxMsgSend);
@@ -177,6 +195,7 @@
             // 
             // buttonSendFile
             // 
+            this.buttonSendFile.ForeColor = System.Drawing.Color.Black;
             this.buttonSendFile.Location = new System.Drawing.Point(9, 353);
             this.buttonSendFile.Name = "buttonSendFile";
             this.buttonSendFile.Size = new System.Drawing.Size(72, 21);
@@ -187,6 +206,7 @@
             // 
             // buttonSend
             // 
+            this.buttonSend.ForeColor = System.Drawing.Color.Black;
             this.buttonSend.Location = new System.Drawing.Point(451, 353);
             this.buttonSend.Name = "buttonSend";
             this.buttonSend.Size = new System.Drawing.Size(72, 21);
@@ -208,30 +228,24 @@
             this.textBoxMsgReceive.Location = new System.Drawing.Point(9, 17);
             this.textBoxMsgReceive.Multiline = true;
             this.textBoxMsgReceive.Name = "textBoxMsgReceive";
+            this.textBoxMsgReceive.ReadOnly = true;
             this.textBoxMsgReceive.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxMsgReceive.Size = new System.Drawing.Size(514, 330);
             this.textBoxMsgReceive.TabIndex = 0;
-            // 
-            // buttonAddGroup
-            // 
-            this.buttonAddGroup.Location = new System.Drawing.Point(6, 321);
-            this.buttonAddGroup.Name = "buttonAddGroup";
-            this.buttonAddGroup.Size = new System.Drawing.Size(132, 24);
-            this.buttonAddGroup.TabIndex = 3;
-            this.buttonAddGroup.Text = "新建群聊";
-            this.buttonAddGroup.UseVisualStyleBackColor = true;
-            this.buttonAddGroup.Click += new System.EventHandler(this.buttonAddGroup_Click);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(705, 519);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "FormMain";
             this.Text = "计算机网络大作业";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormMain_FormClosed);
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

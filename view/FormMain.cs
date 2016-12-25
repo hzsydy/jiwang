@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using jiwang.model;
 using System.IO;
-using jiwang.view;
 
-namespace jiwang
+namespace jiwang.view
 {
     public partial class FormMain : Form
     {
@@ -28,6 +27,7 @@ namespace jiwang
             ls.form  = this;
 
             listBoxFriend.DisplayMember = "Nickname";
+
         }
 
         public void writeError(Exception ex)
@@ -255,6 +255,11 @@ namespace jiwang
             {
                 writeError(ex);
             }
+        }
+
+        private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Environment.Exit(0);
         }
 
     }

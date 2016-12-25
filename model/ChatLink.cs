@@ -37,11 +37,11 @@ namespace jiwang.model
             }
         }
 
-        struct link
+        class link
         {
-            public string dst_username;
-            public Socket sendSocket;
-            public ManualResetEvent canSend;
+            public string dst_username { get; set; }
+            public Socket sendSocket { get; set; }
+            public ManualResetEvent canSend { get; set; }
             public bool linked { get { return sendSocket.Connected; } }
         }
 
@@ -68,7 +68,7 @@ namespace jiwang.model
                 sendSocket.ReceiveTimeout = 1000;
                 sendSocket.SendBufferSize = 8192;
                 sendSocket.SendTimeout = 1000;
-                link l;
+                link l = new link();
                 l.canSend = new ManualResetEvent(false);
                 l.canSend.Set();
                 l.dst_username = dst_username;
@@ -81,7 +81,24 @@ namespace jiwang.model
         {
             lock (thisLock)
             {
-                ;
+                link l = null;
+                foreach (link ll in links)
+                {
+                    if (ll.dst_username == dst_username)
+                    {
+                        l = ll;
+                        break;
+                    }
+                }
+                if (l != null)
+                {
+                    links.Remove(l);
+                    if (l.linked)
+                    {
+                        l.sendSocket.Shutdown(SocketShutdown.Both);
+                        l.sendSocket.Close();
+                    }
+                }
             }
         }
 
@@ -114,17 +131,7 @@ namespace jiwang.model
 
         public void stop()
         {
-            lock (thisLock)
-            {
-                foreach (link l in links)
-                {
-                    if (l.linked)
-                    {
-                        l.sendSocket.Shutdown(SocketShutdown.Both);
-                        l.sendSocket.Close();
-                    }
-                }
-            }
+            sendMsg(common.type_str_quit_group, sl.getUserName());
         }
 
         void checkDstOnline(link l)
@@ -221,20 +228,23 @@ namespace jiwang.model
                         nickname = username2;
                     }
                 }
-                for (int i = 0; i < usernum; i++ )
+                lock (thisLock)
                 {
-                    string username = common.ascii2Str(lb_msg.GetRange(i * len, len));
-                    bool exist = false;
-                    foreach (link l in links)
+                    for (int i = 0; i < usernum; i++)
                     {
-                        if (username == l.dst_username)
+                        string username = common.ascii2Str(lb_msg.GetRange(i * len, len));
+                        bool exist = false;
+                        foreach (link l in links)
                         {
-                            exist = true;
+                            if (username == l.dst_username)
+                            {
+                                exist = true;
+                            }
                         }
-                    }
-                    if (!exist)
-                    {
-                        addUser(username);
+                        if (!exist)
+                        {
+                            addUser(username);
+                        }
                     }
                 }
                 foreach (link l in links)
@@ -248,6 +258,11 @@ namespace jiwang.model
                         ls.writeError(ex);
                     }
                 }
+            }
+            else if (type_str == common.type_str_quit_group)
+            {
+                string username = common.ascii2Str(msg);
+                delUser(username);
             }
         }
 
