@@ -121,9 +121,9 @@ namespace jiwang.model
             }
         }
 
-        public ChatLink getChatLink(string username)
+        public ChatLink getChatLink(string chatname)
         {
-            return reg_chatlinks[username];
+            return reg_chatlinks[chatname];
         }
 
         public void start()

@@ -237,6 +237,12 @@ namespace jiwang.view
 
         public void writeInstantMsg(string msg)
         {
+            if(msg == "远程主机强迫关闭了一个现有的连接。")
+            {
+                //发RST发习惯了我都数不清到底发了多少RST了
+                //姑且假装什么事情都没有发生
+                return;
+            }
             textBoxMsgReceive.AppendText(msg);
             textBoxMsgReceive.AppendText(Environment.NewLine);
         }
@@ -259,6 +265,15 @@ namespace jiwang.view
                     string filepath = folderBrowserDialog.SelectedPath + @"\" + filename;
                     File.WriteAllBytes(filepath, bytes);
                     writeMsg(chatname, "文件已保存到" + filepath);
+
+                    string text = string.Format(
+                           "{0} 在 {1:MM-dd H:mm:ss} 成功接收了文件{2}",
+                           sl.getUserName(),
+                           DateTime.Now,
+                           filename
+                           );
+                    ChatLink cl = ls.getChatLink(chatname);
+                    cl.sendMsg(common.type_str_text, text);
                 }
             }
             catch (System.Exception ex)

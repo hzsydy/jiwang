@@ -263,6 +263,10 @@ namespace jiwang.model
             {
                 string username = common.ascii2Str(msg);
                 delUser(username);
+                if (links.Count == 1)
+                {
+                    ls.unregister(chatname);
+                }
             }
         }
 
