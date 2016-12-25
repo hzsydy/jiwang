@@ -28,7 +28,8 @@ namespace jiwang.view
             ls = new Listener(sl);
             ls.form  = this;
 
-            listBoxFriend.DisplayMember = "Nickname";
+            //listBoxFriend.DisplayMember = "Nickname";
+            listBoxFriend.DrawMode = DrawMode.OwnerDrawFixed;
 
             msgHistory = new Dictionary<string, StringBuilder>();
         }
@@ -256,8 +257,9 @@ namespace jiwang.view
 
         public void writeMsg(string chatname, string msg)
         {
-            StringBuilder sb = getsb(chatname);
-            sb.AppendLine(msg);
+            MsgHistory m = getMsgHistory(chatname);
+            m.sb.AppendLine(msg);
+            m.unread++;
             refreshTextWindow();
         }
 
@@ -289,14 +291,22 @@ namespace jiwang.view
             }
         }
 
-        Dictionary<string, StringBuilder> msgHistory;
-        StringBuilder getsb(string chatname)
+        struct MsgHistory
         {
-            if (!msgHistory.ContainsKey(chatname))
+            public StringBuilder sb;
+            public int unread;
+        }
+        Dictionary<string, MsgHistory> msgHistorys;
+        MsgHistory getMsgHistory(string chatname)
+        {
+            if (!msgHistorys.ContainsKey(chatname))
             {
-                msgHistory.Add(chatname, new StringBuilder());
+                MsgHistory m;
+                m.sb = new StringBuilder();
+                m.unread = 0;
+                msgHistorys.Add(chatname, m);
             }
-            return msgHistory[chatname];
+            return msgHistorys[chatname];
         }
 
         void refreshTextWindow()
@@ -305,8 +315,11 @@ namespace jiwang.view
             {
                 string chatname = ((ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex]).getChatname();
                 textBoxMsgReceive.Text = string.Empty;
-                textBoxMsgReceive.AppendText(getsb(chatname).ToString());
+                MsgHistory m = getMsgHistory(chatname);
+                textBoxMsgReceive.AppendText(m.sb.ToString());
+                m.unread = 0;
             }
+            listBoxFriend.Refresh();
         }
 
         private void listBoxFriend_SelectedIndexChanged(object sender, EventArgs e)
@@ -331,7 +344,7 @@ namespace jiwang.view
             {
                 string chatname = chatNode.Attributes["chatname"].Value;
                 string history = chatNode.InnerText;
-                StringBuilder sb = getsb(chatname);
+                StringBuilder sb = getMsgHistory(chatname).sb;
                 sb.Append(history);
             }
         }
@@ -341,13 +354,13 @@ namespace jiwang.view
             XmlDocument xmlDoc = new XmlDocument();
             XmlNode rootNode = xmlDoc.CreateElement("chats");
             xmlDoc.AppendChild(rootNode);
-            foreach (string chatname in msgHistory.Keys)
+            foreach (string chatname in msgHistorys.Keys)
             {
                 XmlNode chatNode = xmlDoc.CreateElement("chat");
                 XmlAttribute attribute = xmlDoc.CreateAttribute("chatname");
                 attribute.Value = chatname;
                 chatNode.Attributes.Append(attribute);
-                chatNode.InnerText = msgHistory[chatname].ToString();
+                chatNode.InnerText = (msgHistorys[chatname]).sb.ToString();
                 rootNode.AppendChild(chatNode);
             }
             xmlDoc.Save("chat_mistory.xml");
@@ -358,6 +371,24 @@ namespace jiwang.view
             ls.stop();
             saveHistory();
             Environment.Exit(0);
+        }
+
+        private void listBoxFriend_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            e.DrawBackground();
+            ChatLink cl = (ChatLink)listBoxFriend.Items[e.Index];
+            string chatname = cl.getChatname();
+            var m = getMsgHistory(chatname);
+            if (m.unread > 0)
+            {
+                string showText = string.Format("({0}){1}", m.unread, cl.Nickname);
+                e.Graphics.DrawString(showText, new Font("Arial", 10, FontStyle.Bold), Brushes.Black, e.Bounds);
+            }
+            else
+            {
+                e.Graphics.DrawString(cl.Nickname, new Font("Arial", 10, FontStyle.Regular), Brushes.Black, e.Bounds);
+            }
+            e.DrawFocusRectangle();
         }
     }
 }

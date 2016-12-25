@@ -178,6 +178,7 @@
             this.listBoxFriend.Name = "listBoxFriend";
             this.listBoxFriend.Size = new System.Drawing.Size(130, 268);
             this.listBoxFriend.TabIndex = 0;
+            this.listBoxFriend.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxFriend_DrawItem);
             this.listBoxFriend.SelectedIndexChanged += new System.EventHandler(this.listBoxFriend_SelectedIndexChanged);
             // 
             // groupBox3
