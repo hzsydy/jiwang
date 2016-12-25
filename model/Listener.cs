@@ -172,6 +172,7 @@ namespace jiwang.model
         public void stop()
         {
             working = false;
+            listenSocket.Shutdown(SocketShutdown.Both);
             listenSocket.Close();
             string[] chats = reg_chatlinks.Keys.ToArray();
             foreach (string c in chats)

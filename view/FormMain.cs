@@ -348,6 +348,7 @@ namespace jiwang.view
 
         private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
         {
+            ls.stop();
             saveHistory();
             Environment.Exit(0);
         }

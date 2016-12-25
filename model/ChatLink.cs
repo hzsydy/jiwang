@@ -131,7 +131,8 @@ namespace jiwang.model
 
         public void stop()
         {
-            sendMsg(common.type_str_quit_group, sl.getUserName());
+            byte[] msg = common.str2ascii(sl.getUserName(), common.name_header_length);
+            sendMsg(common.type_str_quit_group, msg);
         }
 
         void checkDstOnline(link l)
