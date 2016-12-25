@@ -97,11 +97,11 @@ namespace jiwang.model
             }
         }
 
-        public void writeMsg(string msg)
+        public void writeMsg(string chatname, string msg)
         {
             if (form != null)
             {
-                form.BeginInvoke((Action)delegate { form.writeMsg(msg); });
+                form.BeginInvoke((Action)delegate { form.writeMsg(chatname, msg); });
             }
         }
 
@@ -113,11 +113,11 @@ namespace jiwang.model
             }
         }
 
-        public void writeFile(string filename, byte[] bytes)
+        public void writeFile(string chatname, string filename, byte[] bytes)
         {
             if (form != null)
             {
-                form.BeginInvoke((Action)delegate { form.writeFile(filename, bytes); });
+                form.BeginInvoke((Action)delegate { form.writeFile(chatname, filename, bytes); });
             }
         }
 

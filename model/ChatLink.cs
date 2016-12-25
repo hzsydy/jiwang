@@ -182,14 +182,14 @@ namespace jiwang.model
             if (type_str == common.type_str_text)
             {
                 string str_msg = common.unicode2Str(msg);
-                ls.writeMsg(str_msg);
+                ls.writeMsg(chatname, str_msg);
             }
             else if (type_str == common.type_str_file)
             {
                 if (nextFileOwner != sl.getUserName())
                 {
                     //防止在群聊中重复发给自己
-                    ls.writeFile(nextFileName, msg);
+                    ls.writeFile(chatname, nextFileName, msg);
                 }
             } 
             else if (type_str == common.type_str_ping)

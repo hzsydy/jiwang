@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using jiwang.model;
 using System.IO;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace jiwang.view
 {
@@ -28,27 +30,14 @@ namespace jiwang.view
 
             listBoxFriend.DisplayMember = "Nickname";
 
-        }
-
-        public void writeError(Exception ex)
-        {
-            if (ex != null)
-            {
-                writeMsg(ex.Message);
-            }
-        }
-
-        public void writeMsg(string msg)
-        {
-            textBoxMsgReceive.AppendText(msg);
-            textBoxMsgReceive.AppendText(Environment.NewLine);
+            msgHistory = new Dictionary<string, StringBuilder>();
         }
 
         private void FormMain_Load(object sender, EventArgs e)
         {
             try
             {
-                ;
+                loadHistory();
             }
             catch (System.Exception ex)
             {
@@ -70,7 +59,7 @@ namespace jiwang.view
                     writeError(ea.Error);
                     if (ea.Error == null)
                     {
-                        writeMsg("您已经成功登录，用户名为" + sl.getUserName());
+                        writeInstantMsg("您已经成功登录，用户名为" + sl.getUserName());
                     }
                 };
                 bw.RunWorkerAsync();
@@ -92,7 +81,7 @@ namespace jiwang.view
                     if (ea.Error == null)
                     {
                         listBoxFriend.Items.Clear();
-                        writeMsg("您已经成功下线，用户名为" + sl.getUserName());
+                        writeInstantMsg("您已经成功下线，用户名为" + sl.getUserName());
                     }
                 };
                 bw.RunWorkerAsync();
@@ -238,7 +227,28 @@ namespace jiwang.view
             }
         }
 
-        public void writeFile(string filename, byte[] bytes)
+        public void writeError(Exception ex)
+        {
+            if (ex != null)
+            {
+                writeInstantMsg(ex.Message);
+            }
+        }
+
+        public void writeInstantMsg(string msg)
+        {
+            textBoxMsgReceive.AppendText(msg);
+            textBoxMsgReceive.AppendText(Environment.NewLine);
+        }
+
+        public void writeMsg(string chatname, string msg)
+        {
+            StringBuilder sb = getsb(chatname);
+            sb.AppendLine(msg);
+            refreshTextWindow();
+        }
+
+        public void writeFile(string chatname, string filename, byte[] bytes)
         {
             try
             {
@@ -248,7 +258,7 @@ namespace jiwang.view
                 {
                     string filepath = folderBrowserDialog.SelectedPath + @"\" + filename;
                     File.WriteAllBytes(filepath, bytes);
-                    writeMsg("文件已保存到" + filepath);
+                    writeMsg(chatname, "文件已保存到" + filepath);
                 }
             }
             catch (System.Exception ex)
@@ -257,10 +267,74 @@ namespace jiwang.view
             }
         }
 
-        private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
+        Dictionary<string, StringBuilder> msgHistory;
+        StringBuilder getsb(string chatname)
         {
-            Environment.Exit(0);
+            if (!msgHistory.ContainsKey(chatname))
+            {
+                msgHistory.Add(chatname, new StringBuilder());
+            }
+            return msgHistory[chatname];
         }
 
+        void refreshTextWindow()
+        {
+            if (listBoxFriend.SelectedIndex != -1)
+            {
+                string chatname = ((ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex]).getChatname();
+                textBoxMsgReceive.Text = string.Empty;
+                textBoxMsgReceive.AppendText(getsb(chatname).ToString());
+            }
+        }
+
+        private void listBoxFriend_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            refreshTextWindow();
+        }
+
+        void loadHistory()
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            try
+            {
+                xmlDoc.Load("chat_mistory.xml");
+            }
+            catch (System.Exception /*ex*/)
+            {
+                writeInstantMsg("未能找到上次运行的聊天记录！");
+                return;
+            }
+            XmlNodeList chatNodes = xmlDoc.SelectNodes("//chats/chat");
+            foreach (XmlNode chatNode in chatNodes)
+            {
+                string chatname = chatNode.Attributes["chatname"].Value;
+                string history = chatNode.InnerText;
+                StringBuilder sb = getsb(chatname);
+                sb.Append(history);
+            }
+        }
+
+        void saveHistory()
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlNode rootNode = xmlDoc.CreateElement("chats");
+            xmlDoc.AppendChild(rootNode);
+            foreach (string chatname in msgHistory.Keys)
+            {
+                XmlNode chatNode = xmlDoc.CreateElement("chat");
+                XmlAttribute attribute = xmlDoc.CreateAttribute("chatname");
+                attribute.Value = chatname;
+                chatNode.Attributes.Append(attribute);
+                chatNode.InnerText = msgHistory[chatname].ToString();
+                rootNode.AppendChild(chatNode);
+            }
+            xmlDoc.Save("chat_mistory.xml");
+        }
+
+        private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            saveHistory();
+            Environment.Exit(0);
+        }
     }
 }
