@@ -310,9 +310,10 @@ namespace jiwang.model
             else if (type_str == common.type_str_request_nickname)
             {
                 string username = common.ascii2Str(msg);
+                string mynickname = ls.getThisNickname();
                 if (username == sl.getUserName())
                 {
-                    sendMsg(common.type_str_answer_nickname, ls.getThisNickname());
+                    sendMsg(common.type_str_answer_nickname, mynickname);
                 }
             }
             else if (type_str == common.type_str_answer_nickname)

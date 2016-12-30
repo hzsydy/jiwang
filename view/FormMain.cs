@@ -180,6 +180,7 @@ namespace jiwang.view
                 if (cl.groupNumber == 2)
                 {
                     cl.Nickname = newname;
+                    listBoxFriend.Refresh();
                 }
                 else
                 {

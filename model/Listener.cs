@@ -126,10 +126,12 @@ namespace jiwang.model
         {
             if (form != null)
             {
-                IAsyncResult result = form.BeginInvoke((Action)delegate { form.getThisNickname(); });
-                result.AsyncWaitHandle.WaitOne();
-                string returnValue = (string)form.EndInvoke(result);
-                return returnValue;
+                //IAsyncResult result = form.BeginInvoke((Action)delegate { form.getThisNickname(); });
+                //result.AsyncWaitHandle.WaitOne();
+                //string returnValue = (string)form.EndInvoke(result);
+                //return returnValue;
+                string nickname = form.getThisNickname();
+                return nickname;
             }
             return sl.getUserName();
         }
