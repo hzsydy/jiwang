@@ -47,6 +47,7 @@
             this.textBoxMsgReceive = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxNickname = new System.Windows.Forms.TextBox();
+            this.buttonChangeName = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -128,6 +129,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox2.Controls.Add(this.buttonChangeName);
             this.groupBox2.Controls.Add(this.textBoxNickname);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.buttonAddGroup);
@@ -144,7 +146,7 @@
             // buttonAddGroup
             // 
             this.buttonAddGroup.ForeColor = System.Drawing.Color.Black;
-            this.buttonAddGroup.Location = new System.Drawing.Point(6, 321);
+            this.buttonAddGroup.Location = new System.Drawing.Point(6, 291);
             this.buttonAddGroup.Name = "buttonAddGroup";
             this.buttonAddGroup.Size = new System.Drawing.Size(132, 24);
             this.buttonAddGroup.TabIndex = 3;
@@ -166,7 +168,7 @@
             // buttonAddFriend
             // 
             this.buttonAddFriend.ForeColor = System.Drawing.Color.Black;
-            this.buttonAddFriend.Location = new System.Drawing.Point(6, 291);
+            this.buttonAddFriend.Location = new System.Drawing.Point(6, 261);
             this.buttonAddFriend.Name = "buttonAddFriend";
             this.buttonAddFriend.Size = new System.Drawing.Size(132, 24);
             this.buttonAddFriend.TabIndex = 1;
@@ -180,7 +182,7 @@
             this.listBoxFriend.ItemHeight = 12;
             this.listBoxFriend.Location = new System.Drawing.Point(8, 47);
             this.listBoxFriend.Name = "listBoxFriend";
-            this.listBoxFriend.Size = new System.Drawing.Size(130, 232);
+            this.listBoxFriend.Size = new System.Drawing.Size(130, 208);
             this.listBoxFriend.TabIndex = 0;
             this.listBoxFriend.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxFriend_DrawItem);
             this.listBoxFriend.SelectedIndexChanged += new System.EventHandler(this.listBoxFriend_SelectedIndexChanged);
@@ -256,6 +258,17 @@
             this.textBoxNickname.TabIndex = 6;
             this.textBoxNickname.Text = "Du";
             // 
+            // buttonChangeName
+            // 
+            this.buttonChangeName.ForeColor = System.Drawing.Color.Black;
+            this.buttonChangeName.Location = new System.Drawing.Point(6, 321);
+            this.buttonChangeName.Name = "buttonChangeName";
+            this.buttonChangeName.Size = new System.Drawing.Size(132, 24);
+            this.buttonChangeName.TabIndex = 7;
+            this.buttonChangeName.Text = "修改备注";
+            this.buttonChangeName.UseVisualStyleBackColor = true;
+            this.buttonChangeName.Click += new System.EventHandler(this.buttonChangeName_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -301,6 +314,7 @@
         private System.Windows.Forms.Button buttonAddGroup;
         private System.Windows.Forms.TextBox textBoxNickname;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button buttonChangeName;
     }
 }
 

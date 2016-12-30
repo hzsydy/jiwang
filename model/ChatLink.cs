@@ -24,6 +24,11 @@ namespace jiwang.model
             return chatname;
         }
 
+        public int groupNumber
+        {
+            get { return links.Count; }
+        }
+
         string nickname;
         public string Nickname
         {

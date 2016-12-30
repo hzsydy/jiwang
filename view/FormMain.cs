@@ -12,6 +12,7 @@ using jiwang.model;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml;
+using Microsoft.VisualBasic;
 
 namespace jiwang.view
 {
@@ -167,6 +168,23 @@ namespace jiwang.view
                 ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
                 ls.unregister(cl.getChatname());
                 writeInstantMsg("已删除聊天：" + cl.Nickname);
+            }
+        }
+
+        private void buttonChangeName_Click(object sender, EventArgs e)
+        {
+            if (listBoxFriend.SelectedIndex > -1)
+            {
+                ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
+                string newname = Interaction.InputBox("请输入新的备注", "计网大作业", "滑稽");
+                if (cl.groupNumber == 2)
+                {
+                    cl.Nickname = newname;
+                }
+                else
+                {
+                    cl.sendMsg(common.type_str_set_groupname, newname);
+                }
             }
         }
 
