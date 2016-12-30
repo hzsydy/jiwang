@@ -329,7 +329,7 @@ namespace jiwang.model
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
                     nicknameRequested = null;
-                    sendMsg(common.type_str_answer_nickname, common.str2ascii(username, common.name_header_length));
+                    sendMsg(common.type_str_request_nickname, common.str2ascii(username, common.name_header_length));
                     Thread.Sleep(common.ping_timeout);
                     if (nicknameRequested == null)
                     {

@@ -412,17 +412,20 @@ namespace jiwang.view
         private void listBoxFriend_DrawItem(object sender, DrawItemEventArgs e)
         {
             e.DrawBackground();
-            ChatLink cl = (ChatLink)listBoxFriend.Items[e.Index];
-            string chatname = cl.getChatname();
-            var m = getMsgHistory(chatname);
-            if (m.unread > 0)
+            if (e.Index >= 0)
             {
-                string showText = string.Format("【{0}未读】{1}", m.unread, cl.Nickname);
-                e.Graphics.DrawString(showText, new Font("Arial", 8, FontStyle.Bold), Brushes.Black, e.Bounds);
-            }
-            else
-            {
-                e.Graphics.DrawString(cl.Nickname, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, e.Bounds);
+                ChatLink cl = (ChatLink)listBoxFriend.Items[e.Index];
+                string chatname = cl.getChatname();
+                var m = getMsgHistory(chatname);
+                if (m.unread > 0)
+                {
+                    string showText = string.Format("【{0}未读】{1}", m.unread, cl.Nickname);
+                    e.Graphics.DrawString(showText, new Font("Arial", 8, FontStyle.Bold), Brushes.Black, e.Bounds);
+                }
+                else
+                {
+                    e.Graphics.DrawString(cl.Nickname, new Font("Arial", 8, FontStyle.Regular), Brushes.Black, e.Bounds);
+                }
             }
             e.DrawFocusRectangle();
         }
