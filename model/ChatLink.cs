@@ -181,7 +181,7 @@ namespace jiwang.model
                     Thread.Sleep(common.ping_timeout);
                     if (!echoreceived)
                     {
-                        ls.writeError(new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。"));
+                        ls.popMsg(string.Format("{0}已经失联", nickname));
                         keepwork = false;
                     }
                 };

@@ -122,6 +122,14 @@ namespace jiwang.model
             }
         }
 
+        public void popMsg(string msg)
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.popMsg(msg); });
+            }
+        }
+
         public void writeFile(string chatname, string filename, byte[] bytes)
         {
             if (form != null)

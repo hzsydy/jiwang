@@ -288,14 +288,19 @@ namespace jiwang.view
             }
         }
 
+        public void popMsg(string msg)
+        {
+            MessageBox.Show("msg", "计网大作业");
+        }
+
         public void writeInstantMsg(string msg)
         {
-            if(msg == "远程主机强迫关闭了一个现有的连接。")
-            {
-                //发RST发习惯了我都数不清到底发了多少RST了
-                //姑且假装什么事情都没有发生
-                return;
-            }
+            //if(msg == "远程主机强迫关闭了一个现有的连接。")
+            //{
+            //    //发RST发习惯了我都数不清到底发了多少RST了
+            //    //姑且假装什么事情都没有发生
+            //    return;
+            //}
             textBoxMsgReceive.AppendText(msg);
             textBoxMsgReceive.AppendText(Environment.NewLine);
         }
