@@ -22,7 +22,7 @@ namespace jiwang.model
         Dictionary<string, ChatLink> reg_chatlinks;
 
         bool working = false;
-        bool isRunning() { return working; }
+        public bool isRunning() { return working; }
 
         ManualResetEvent allDone;
 
@@ -33,7 +33,8 @@ namespace jiwang.model
             this.sl = sl;
             working = false;
 
-            listenSocket = null;
+            listenSocket = new Socket(AddressFamily.InterNetwork,
+               SocketType.Stream, ProtocolType.Tcp);
             form = null;
             reg_chatlinks = new Dictionary<string, ChatLink>();
 
@@ -135,8 +136,6 @@ namespace jiwang.model
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, common.p2p_port);
             try
             {
-                listenSocket = new Socket(AddressFamily.InterNetwork,
-                   SocketType.Stream, ProtocolType.Tcp);
                 listenSocket.Bind(localEndPoint);
                 listenSocket.Listen(backlog);
                 working = true;
@@ -163,8 +162,11 @@ namespace jiwang.model
             }
             catch (System.Exception ex)
             {
-                working = false;
-                listenSocket.Close();
+                working = false; 
+                if (listenSocket.Connected)
+                {
+                    listenSocket.Close();
+                }
                 throw ex;
             }
         }

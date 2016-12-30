@@ -53,7 +53,10 @@ namespace jiwang.view
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
                     sl.logIn(textBoxUsername.Text, textBoxPassword.Text);
-                    ls.start();
+                    if (!ls.isRunning())
+                    {
+                        ls.start();
+                    }
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
@@ -74,7 +77,6 @@ namespace jiwang.view
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
                     sl.logOut();
-                    ls.stop();
                 };
                 bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
                 {
@@ -142,6 +144,7 @@ namespace jiwang.view
                 {
                     cl.sendMsg(common.type_str_set_groupname, nickname);
                 }
+                writeInstantMsg("已添加聊天：" + cl.Nickname);
             }
             catch (System.Exception ex)
             {
@@ -153,7 +156,9 @@ namespace jiwang.view
         {
             if (listBoxFriend.SelectedIndex > -1)
             {
-                ls.unregister(((ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex]).getChatname());
+                ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
+                ls.unregister(cl.getChatname());
+                writeInstantMsg("已删除聊天：" + cl.Nickname);
             }
         }
 
