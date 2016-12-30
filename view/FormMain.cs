@@ -91,6 +91,11 @@ namespace jiwang.view
             }
         }
 
+        public string getThisNickname()
+        {
+            return textBoxNickname.Text;
+        }
+
         public void refreshFriendList(Dictionary<string, ChatLink> regdict)
         {
             //TODO
@@ -138,7 +143,10 @@ namespace jiwang.view
                 cl.start();
                 if (users.Count == 1)
                 {
-                    cl.Nickname = nickname;
+                    if (nickname != "")
+                    {
+                        cl.Nickname = nickname;
+                    }
                 }
                 else
                 {
@@ -167,8 +175,8 @@ namespace jiwang.view
             if (listBoxFriend.SelectedIndex > -1)
             {
                 string text = string.Format(
-                    "{0} {1:MM-dd H:mm:ss}{2}", 
-                    sl.getUserName(),
+                    "{0} {1:MM-dd H:mm:ss}{2}",
+                    getMyFullname(),
                     DateTime.Now,
                     Environment.NewLine
                     );
@@ -184,6 +192,11 @@ namespace jiwang.view
                 	 writeError(ex);
                 }
             }
+        }
+
+        string getMyFullname()
+        {
+            return string.Format("{0}({1})", textBoxNickname.Text, sl.getUserName());
         }
 
 
@@ -209,8 +222,8 @@ namespace jiwang.view
                         ChatLink cl = (ChatLink)listBoxFriend.Items[listBoxFriend.SelectedIndex];
 
                         string text = string.Format(
-                            "{0} 在 {1:MM-dd H:mm:ss} 分享了文件{2}", 
-                            sl.getUserName(),
+                            "{0} 在 {1:MM-dd H:mm:ss} 分享了文件{2}",
+                            getMyFullname(),
                             DateTime.Now,
                             filename
                             );
@@ -282,7 +295,7 @@ namespace jiwang.view
 
                     string text = string.Format(
                            "{0} 在 {1:MM-dd H:mm:ss} 成功接收了文件{2}",
-                           sl.getUserName(),
+                           getMyFullname(),
                            DateTime.Now,
                            filename
                            );

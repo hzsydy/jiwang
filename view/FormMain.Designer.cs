@@ -45,6 +45,8 @@
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBoxMsgSend = new System.Windows.Forms.TextBox();
             this.textBoxMsgReceive = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBoxNickname = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -119,13 +121,15 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(6, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(41, 12);
+            this.label1.Size = new System.Drawing.Size(35, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "用户名";
+            this.label1.Text = " 学号";
             // 
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox2.Controls.Add(this.textBoxNickname);
+            this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.buttonAddGroup);
             this.groupBox2.Controls.Add(this.buttonDelFriend);
             this.groupBox2.Controls.Add(this.buttonAddFriend);
@@ -174,9 +178,9 @@
             // 
             this.listBoxFriend.FormattingEnabled = true;
             this.listBoxFriend.ItemHeight = 12;
-            this.listBoxFriend.Location = new System.Drawing.Point(8, 17);
+            this.listBoxFriend.Location = new System.Drawing.Point(8, 47);
             this.listBoxFriend.Name = "listBoxFriend";
-            this.listBoxFriend.Size = new System.Drawing.Size(130, 268);
+            this.listBoxFriend.Size = new System.Drawing.Size(130, 232);
             this.listBoxFriend.TabIndex = 0;
             this.listBoxFriend.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxFriend_DrawItem);
             this.listBoxFriend.SelectedIndexChanged += new System.EventHandler(this.listBoxFriend_SelectedIndexChanged);
@@ -235,6 +239,23 @@
             this.textBoxMsgReceive.Size = new System.Drawing.Size(514, 330);
             this.textBoxMsgReceive.TabIndex = 0;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 23);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 12);
+            this.label3.TabIndex = 6;
+            this.label3.Text = " 昵称";
+            // 
+            // textBoxNickname
+            // 
+            this.textBoxNickname.Location = new System.Drawing.Point(59, 20);
+            this.textBoxNickname.Name = "textBoxNickname";
+            this.textBoxNickname.Size = new System.Drawing.Size(79, 21);
+            this.textBoxNickname.TabIndex = 6;
+            this.textBoxNickname.Text = "Du";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -252,6 +273,7 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
@@ -277,6 +299,8 @@
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.Button buttonSendFile;
         private System.Windows.Forms.Button buttonAddGroup;
+        private System.Windows.Forms.TextBox textBoxNickname;
+        private System.Windows.Forms.Label label3;
     }
 }
 

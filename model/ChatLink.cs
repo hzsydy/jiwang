@@ -173,7 +173,8 @@ namespace jiwang.model
         //    }
         //}
 
-        //bool echoreceived = false;
+        bool echoreceived = false;
+        string nicknameRequested = null;
         string nextFileName = string.Empty;
         string nextFileOwner = string.Empty;
 
@@ -187,10 +188,35 @@ namespace jiwang.model
             }
             else if (type_str == common.type_str_file)
             {
-                if (nextFileOwner != sl.getUserName())
+                using (BackgroundWorker bw = new BackgroundWorker())
                 {
-                    //防止在群聊中重复发给自己
-                    ls.writeFile(chatname, nextFileName, msg);
+                    bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                    {
+                        if (nextFileOwner == string.Empty || nextFileName == string.Empty)
+                        {
+                            Thread.Sleep(common.waitfilename_timeout);
+                        }
+                        if (nextFileOwner == string.Empty)
+                        {
+                            return;
+                        }
+                        //防止在群聊中重复发给自己
+                        if (nextFileOwner != sl.getUserName())
+                        {
+                            if (nextFileName == string.Empty)
+                            {
+                                return;
+                            }
+                            ls.writeFile(chatname, nextFileName, msg);
+                            nextFileName = string.Empty;
+                            nextFileOwner = string.Empty;
+                        }
+                    };
+                    bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                    {
+                        ;
+                    };
+                    bw.RunWorkerAsync();
                 }
             } 
             else if (type_str == common.type_str_ping)
@@ -214,22 +240,6 @@ namespace jiwang.model
                 List<byte> lb_msg = new List<byte>(msg);
                 int len = common.name_header_length;
                 int usernum = msg.Length / len;
-                if (usernum == 2 && nickname == common.default_nickname)
-                {
-                    //还没有给群聊名称赋值，需要硬点一个
-                    //这是个两人群，也就是单独聊天
-                    string username1 = common.ascii2Str(lb_msg.GetRange(0, len));
-                    string username2 = common.ascii2Str(lb_msg.GetRange(len, len));
-                    if (username1 != sl.getUserName())
-                    {
-                        nickname = username1;
-                    }
-                    else
-                    {
-                        nickname = username2;
-                    }
-                    ls.refreshFriendList();
-                }
                 lock (thisLock)
                 {
                     for (int i = 0; i < usernum; i++)
@@ -260,6 +270,23 @@ namespace jiwang.model
                         ls.writeError(ex);
                     }
                 }
+                if (usernum == 2 && nickname == common.default_nickname)
+                {
+                    //还没有给群聊名称赋值，需要硬点一个
+                    //这是个两人群，也就是单独聊天
+                    string username;
+                    string username1 = common.ascii2Str(lb_msg.GetRange(0, len));
+                    string username2 = common.ascii2Str(lb_msg.GetRange(len, len));
+                    if (username1 != sl.getUserName())
+                    {
+                        username = username1;
+                    }
+                    else
+                    {
+                        username = username2;
+                    }
+                    getDstNickname(username);
+                }
             }
             else if (type_str == common.type_str_quit_group)
             {
@@ -274,6 +301,46 @@ namespace jiwang.model
             {
                 nickname = common.unicode2Str(msg);
                 ls.refreshFriendList();
+            }
+            else if (type_str == common.type_str_request_nickname)
+            {
+                string username = common.ascii2Str(msg);
+                if (username == sl.getUserName())
+                {
+                    sendMsg(common.type_str_answer_nickname, ls.getThisNickname());
+                }
+            }
+            else if (type_str == common.type_str_answer_nickname)
+            {
+                nicknameRequested = common.unicode2Str(msg);
+            }
+        }
+
+        //获得目标的nickname
+        void getDstNickname(string username)
+        {
+            using (BackgroundWorker bw = new BackgroundWorker())
+            {
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    nicknameRequested = null;
+                    sendMsg(common.type_str_answer_nickname, common.str2ascii(username, common.name_header_length));
+                    Thread.Sleep(common.ping_timeout);
+                    if (nicknameRequested == null)
+                    {
+                        nickname = username;
+                    }
+                    else
+                    {
+                        nickname = nicknameRequested;
+                    }
+                    ls.refreshFriendList();
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    ;
+                };
+                bw.RunWorkerAsync();
             }
         }
 

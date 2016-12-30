@@ -122,6 +122,19 @@ namespace jiwang.model
             }
         }
 
+        public string getThisNickname()
+        {
+            if (form != null)
+            {
+                IAsyncResult result = form.BeginInvoke((Action)delegate { form.getThisNickname(); });
+                result.AsyncWaitHandle.WaitOne();
+                string returnValue = (string)form.EndInvoke(result);
+                return returnValue;
+            }
+            return sl.getUserName();
+        }
+
+
         public ChatLink getChatLink(string chatname)
         {
             return reg_chatlinks[chatname];

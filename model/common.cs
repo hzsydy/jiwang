@@ -28,6 +28,9 @@ namespace jiwang.model
         public const int ping_interval = 5000;
         public const int ping_timeout = 2000;
 
+
+        public const int waitfilename_timeout = 1000;
+
         //报文特征码
         
         //发送文字
@@ -43,9 +46,12 @@ namespace jiwang.model
         public const string type_str_invite_group = "ivgp";
         public const string type_str_set_groupname = "stgn";
         public const string type_str_quit_group = "qtgp";
+        //nickname相关
+        public const string type_str_request_nickname = "qnkn";
+        public const string type_str_answer_nickname = "ankn";
 
 
-        public const string default_nickname = "huaji";
+        public const string default_nickname = "__noname__";
 
 
         //生成随机字符串
