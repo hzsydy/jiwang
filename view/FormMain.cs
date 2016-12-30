@@ -290,7 +290,7 @@ namespace jiwang.view
 
         public void popMsg(string msg)
         {
-            MessageBox.Show("msg", "计网大作业");
+            MessageBox.Show(msg, "计网大作业");
         }
 
         public void writeInstantMsg(string msg)

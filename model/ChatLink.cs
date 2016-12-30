@@ -177,7 +177,7 @@ namespace jiwang.model
                 {
                     Thread.Sleep(common.ping_interval);
                     echoreceived = false;
-                    sendMsg(common.type_str_ping, common.str2ascii(sl.getUserName(), common.name_header_length);
+                    sendMsg(common.type_str_ping, common.str2ascii(sl.getUserName(), common.name_header_length));
                     Thread.Sleep(common.ping_timeout);
                     if (!echoreceived)
                     {
