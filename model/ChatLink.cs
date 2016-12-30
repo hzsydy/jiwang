@@ -177,7 +177,7 @@ namespace jiwang.model
                 {
                     Thread.Sleep(common.ping_interval);
                     echoreceived = false;
-                    sendMsg(common.type_str_ping, "");
+                    sendMsg(common.type_str_ping, common.str2ascii(sl.getUserName(), common.name_header_length);
                     Thread.Sleep(common.ping_timeout);
                     if (!echoreceived)
                     {
@@ -255,7 +255,12 @@ namespace jiwang.model
             } 
             else if (type_str == common.type_str_ping)
             {
-                sendMsg(common.type_str_echo, "");
+                string username = common.ascii2Str(msg);
+                //自己给自己发echo就不必了
+                if (username != sl.getUserName())
+                {
+                    sendMsg(common.type_str_echo, "");
+                }
             }
             else if (type_str == common.type_str_echo)
             {
