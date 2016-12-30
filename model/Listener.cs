@@ -291,9 +291,10 @@ namespace jiwang.model
                 handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
                     new AsyncCallback(readCallback), state);
             }
-            catch (System.Exception ex)
+            catch (System.Exception /*ex*/)
             {
-                writeError(ex);
+                //writeError(ex);
+                ;
             }
         }
 
@@ -322,9 +323,10 @@ namespace jiwang.model
                         new AsyncCallback(readCallback), state);
                 }
             }
-            catch (System.Exception ex)
+            catch (System.Exception /*ex*/)
             {
-                writeError(ex);
+                //writeError(ex);
+                ;
             }
         }
 

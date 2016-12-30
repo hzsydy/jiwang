@@ -132,6 +132,7 @@ namespace jiwang.model
                 }
             }
             sendMsg(common.type_str_invite_group, data.ToArray());
+            ping();
         }
 
         public void stop()
@@ -167,16 +168,36 @@ namespace jiwang.model
             if (!l.linked) throw new Exception("无法连接"+l.dst_username+"的IP地址。");
         }
 
-        //public void ping()
-        //{
-        //    echoreceived = false;
-        //    sendMsg(common.type_str_ping, "");
-        //    Thread.Sleep(common.ping_timeout);
-        //    if (!echoreceived)
-        //    {
-        //        throw new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。");
-        //    }
-        //}
+        void ping()
+        {
+            bool keepwork = true;
+            using (BackgroundWorker bw = new BackgroundWorker())
+            {
+                bw.DoWork += (object o, DoWorkEventArgs ea) =>
+                {
+                    echoreceived = false;
+                    sendMsg(common.type_str_ping, "");
+                    Thread.Sleep(common.ping_timeout);
+                    if (!echoreceived)
+                    {
+                        ls.writeError(new Exception("对方客户端无响应，或者与我方客户端并不遵循同一套协议。"));
+                        keepwork = false;
+                    }
+                };
+                bw.RunWorkerCompleted += (object o, RunWorkerCompletedEventArgs ea) =>
+                {
+                    if (keepwork)
+                    {
+                        bw.RunWorkerAsync();
+                    }
+                    else
+                    {
+                        ls.unregister(chatname);
+                    }
+                };
+                bw.RunWorkerAsync();
+            }
+        }
 
         bool echoreceived = false;
         string nicknameRequested = null;
@@ -226,11 +247,11 @@ namespace jiwang.model
             } 
             else if (type_str == common.type_str_ping)
             {
-                //sendMsg(common.type_str_echo, "");
+                sendMsg(common.type_str_echo, "");
             }
             else if (type_str == common.type_str_echo)
             {
-                //echoreceived = true;
+                echoreceived = true;
             }
             else if (type_str == common.type_str_filename)
             {
@@ -290,6 +311,7 @@ namespace jiwang.model
                     {
                         username = username2;
                     }
+                    //然后就查表去要
                     getDstNickname(username);
                 }
             }
@@ -390,9 +412,10 @@ namespace jiwang.model
                     }
                 }
             }
-            catch (System.Exception ex)
+            catch (System.Exception /*ex*/)
             {
-                ls.writeError(ex);
+                //ls.writeError(ex);
+                ;
             }
         }
 
@@ -441,9 +464,10 @@ namespace jiwang.model
                                 new AsyncCallback(SendCallback), state);
                         }
                     }
-                    catch (System.Exception ex)
+                    catch (System.Exception /*ex*/)
                     {
-                        ls.writeError(ex);
+                        //ls.writeError(ex);
+                        ;
                     }
                 }
             }

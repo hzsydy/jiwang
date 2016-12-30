@@ -51,7 +51,7 @@ namespace jiwang.model
         public const string type_str_answer_nickname = "ankn";
 
 
-        public const string default_nickname = "__noname__";
+        public const string default_nickname = "正在加载昵称...";
 
 
         //生成随机字符串
