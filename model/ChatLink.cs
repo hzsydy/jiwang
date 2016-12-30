@@ -175,6 +175,7 @@ namespace jiwang.model
             {
                 bw.DoWork += (object o, DoWorkEventArgs ea) =>
                 {
+                    Thread.Sleep(common.ping_interval);
                     echoreceived = false;
                     sendMsg(common.type_str_ping, "");
                     Thread.Sleep(common.ping_timeout);
@@ -192,7 +193,14 @@ namespace jiwang.model
                     }
                     else
                     {
-                        ls.unregister(chatname);
+                        try
+                        {
+                            ls.unregister(chatname);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            ls.writeCriticalError(ex);
+                        }
                     }
                 };
                 bw.RunWorkerAsync();
@@ -412,10 +420,9 @@ namespace jiwang.model
                     }
                 }
             }
-            catch (System.Exception /*ex*/)
+            catch (System.Exception ex)
             {
-                //ls.writeError(ex);
-                ;
+                ls.writeCriticalError(ex);
             }
         }
 
@@ -464,10 +471,9 @@ namespace jiwang.model
                                 new AsyncCallback(SendCallback), state);
                         }
                     }
-                    catch (System.Exception /*ex*/)
+                    catch (System.Exception ex)
                     {
-                        //ls.writeError(ex);
-                        ;
+                        ls.writeCriticalError(ex);
                     }
                 }
             }

@@ -114,6 +114,14 @@ namespace jiwang.model
             }
         }
 
+        public void writeCriticalError(Exception ex)
+        {
+            if (form != null)
+            {
+                form.BeginInvoke((Action)delegate { form.writeCriticalError(ex); });
+            }
+        }
+
         public void writeFile(string chatname, string filename, byte[] bytes)
         {
             if (form != null)
@@ -291,10 +299,9 @@ namespace jiwang.model
                 handler.BeginReceive(state.buffer, 0, state.buffer.Length, 0,
                     new AsyncCallback(readCallback), state);
             }
-            catch (System.Exception /*ex*/)
+            catch (System.Exception ex)
             {
-                //writeError(ex);
-                ;
+                writeCriticalError(ex);
             }
         }
 
@@ -323,10 +330,9 @@ namespace jiwang.model
                         new AsyncCallback(readCallback), state);
                 }
             }
-            catch (System.Exception /*ex*/)
+            catch (System.Exception ex)
             {
-                //writeError(ex);
-                ;
+                writeCriticalError(ex);
             }
         }
 

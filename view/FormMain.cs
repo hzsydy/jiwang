@@ -280,6 +280,14 @@ namespace jiwang.view
             }
         }
 
+        public void writeCriticalError(Exception ex)
+        {
+            if (ex != null)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public void writeInstantMsg(string msg)
         {
             if(msg == "远程主机强迫关闭了一个现有的连接。")
