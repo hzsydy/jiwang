@@ -130,10 +130,9 @@
             this.Controls.Add(this.textBoxGroupName);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox2);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "FormAddGroup";
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "群初始化";
             this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);

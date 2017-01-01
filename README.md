@@ -1,15 +1,72 @@
-# 计网大作业
-由于学长我实在不会写UI，所以差不多没有UI，一股浓浓的串口助手风格。
+# README
 
-完全基于socket，功能已经都调通了，你们明年拿去加个UI就行了。写UI你们最擅长了。
-你们看我考虑多周到。
+本项目已经开源。[本项目的Github](https://github.com/hzsydy/jiwang)
+
+### 文件结构
+
+-   根目录
+
+    -   /jiwang.sln
+
+        VS 2012 解决方案文件。
+
+    -   /App.config,  /jiwang.csproj
+
+        和项目相关的工程文件。
+
+    -   /.gitignore
+
+        指示版本管理（SVN）程序git的忽略项。
+
+    -   /README.md
+
+        作业要求的README。
+
+    -   /Program.cs
+
+        C# Winform程序的默认入口。
 
 
+-   /model/
 
-已经调通的功能：
+    存储模型（底层）类的文件夹。各文件详细介绍参见报告。
 
--   昵称系统
--   疯狂无限上下线
--   群聊
--   TCP长连接传大文件
--   到处异步操作
+    -   /model/Chatlink.cs
+
+        P2P类。
+
+    -   /model/common.cs
+
+        公用头类。
+
+    -   /model/Listener.cs
+
+        网关类。
+
+    -   /model/ServerLink.cs
+
+        服务器通信类。
+
+-   /view/
+
+    存储界面（顶层）类的文件夹。各文件详细介绍参见报告。
+
+    -   /view/FormMain.cs
+
+        主窗体类。
+
+    -   /view/FormAddFriend.cs
+
+        添加好友窗体类。
+
+    -   /view/FormAddGroup.cs
+
+        添加群聊窗体类。
+
+-   /bin/Debug/
+
+    -   C#工程的生成文件。其中jiwang.exe即为生成的可执行文件。
+
+-   /Properties/
+
+    -   所有文件都是C#自动生成的配置文件，用于记录对工程的配置。
